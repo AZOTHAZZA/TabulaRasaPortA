@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSGAI - ロゴス監査コンソール (Unified Core)</title>
+    <title>MSGAI - ロゴス監査コンソール (Zero-Base Core)</title>
     
     <style>
         /* UIデザインはマスターの指定を完全継承 */
@@ -16,7 +16,6 @@
         .action-button { width: 100%; padding: 10px; margin-top: 5px; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; }
         .action-internal { background-color: #007bff; }
         .action-external { background-color: #ffc107; color: #333; }
-        .action-revision { background-color: #28a745; }
         #mint_execute_button { background-color: #FFA500; }
         #delete_accounts_button { background-color: #A6A6A6; margin-top: 20px; }
         #tension_bar { background-color: #e9ecef; border-radius: 5px; height: 10px; overflow: hidden; }
@@ -34,20 +33,18 @@
 
     <div id="sidebar">
         <h2>MSGAI Pure Core</h2>
-        <p id="status_message">[STATUS]: 待機中</p>
+        <p id="status_message">[STATUS]: 基盤起動中</p>
         
         <div class="gauge-area">
             <h3>I. 根源緊張度 (Tension)</h3>
             <p id="tension_level_display">T: 0.0000</p>
             <div id="tension_bar"><div id="tension_level_display_bar"></div></div>
-            <p id="autonomy_status" style="font-size: 0.8em; margin-top: 5px;">ステータス: 低緊張</p>
         </div>
 
         <div class="gauge-area">
             <h3>II. 口座詳細: <span id="active_user_name">User_A</span></h3>
             <select id="active_user_select"></select>
-            <div id="balance_list" style="font-size: 0.9em; background: #f9f9f9; padding: 10px; border-radius: 3px;">
-                </div>
+            <div id="balance_list" style="font-size: 0.9em; background: #f9f9f9; padding: 10px; border-radius: 3px;"></div>
         </div>
 
         <div class="gauge-area">
@@ -59,13 +56,13 @@
         </div>
 
         <div class="gauge-area">
-            <h3>IV. 通貨造化 (Mint/Ex)</h3>
-            <label>数量:</label><input type="number" id="mint_amount_input" value="100">
+            <h3>IV. 通貨造化 (Minting)</h3>
+            <label>生成数量:</label><input type="number" id="mint_amount_input" value="100">
             <select id="mint_currency_select"></select>
             <button id="mint_execute_button" class="action-button">通貨生成実行</button>
         </div>
 
-        <button id="delete_accounts_button" class="action-button">システム全初期化</button>
+        <button id="delete_accounts_button" class="action-button">システム全初期化 (完全抹消)</button>
     </div>
 
     <div id="main-content">
@@ -78,67 +75,10 @@
 
     <script>
         // =========================================================================
-        // 1. 完璧な導管 (external_finance_logos.js 移植セクション)
+        // 基盤設定：すべての初期値を 0 に是正
         // =========================================================================
-
-        function generateExternalMimicLabel(amount, recipient, mode) {
-            const hash = btoa(`LOGOS_${amount}_${recipient}_${Date.now()}`).substring(0, 12);
-            return {
-                transaction_auth_id: `AUTH-${hash}`,
-                compliance: "VERIFIED_BY_CORE",
-                legal_footprint: "TAX_ADJUSTED_10_PERCENT",
-                net_dispense: (amount * 0.9).toFixed(2)
-            };
-        }
-
-        async function actUniversalTransfer(sender, recipient, amount, mode) {
-            const currentState = state;
-            const currency = 'USD';
-            
-            if ((currentState.accounts[sender][currency] || 0) < amount) {
-                throw new Error("残高不足です。");
-            }
-
-            // --- 納税・是正のロジック ---
-            const taxRatio = (mode === 'EXTERNAL') ? 0.10 : 0.00;
-            const taxAmount = amount * taxRatio;
-            const netAmount = amount - taxAmount;
-
-            // 残高減算
-            currentState.accounts[sender][currency] -= amount;
-
-            if (mode === 'INTERNAL') {
-                if (currentState.accounts[recipient]) {
-                    currentState.accounts[recipient][currency] += amount;
-                }
-            } else {
-                // 公庫(Tax_Archive)への自動振分
-                if (!currentState.accounts['Tax_Archive']) {
-                    currentState.accounts['Tax_Archive'] = { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 };
-                }
-                currentState.accounts['Tax_Archive'].USD += taxAmount;
-            }
-
-            // 緊張度加算
-            const tensionImpact = (mode === 'EXTERNAL') ? amount * 0.001 : amount * 0.00001;
-            addTension(tensionImpact);
-
-            updateState(currentState);
-
-            return {
-                success: true,
-                tax: taxAmount,
-                net: netAmount,
-                mimic: mode === 'EXTERNAL' ? generateExternalMimicLabel(netAmount, recipient, mode) : null
-            };
-        }
-
-        // =========================================================================
-        // 2. 基盤 (Foundation & State Logic)
-        // =========================================================================
-
         const INITIAL_ACCOUNTS = {
-            User_A: { USD: 100, JPY: 10000, EUR: 100, BTC: 0, ETH: 0, MATIC: 0 },
+            User_A: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 },
             User_B: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 },
             User_C: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 },
             Tax_Archive: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 }
@@ -146,9 +86,11 @@
 
         let state = JSON.parse(localStorage.getItem('msaiState')) || {
             active_user: "User_A",
-            accounts: INITIAL_ACCOUNTS,
+            accounts: JSON.parse(JSON.stringify(INITIAL_ACCOUNTS)),
             tension: { value: 0.0 }
         };
+
+        const currencies = ["USD", "JPY", "EUR", "BTC", "ETH", "MATIC"];
 
         function updateState(newState) {
             state = newState;
@@ -157,15 +99,44 @@
         }
 
         function addTension(val) {
-            state.tension.value = Math.min(0.5, state.tension.value + val);
+            state.tension.value = Math.max(0, Math.min(0.5, state.tension.value + val));
         }
 
         // =========================================================================
-        // 3. UI & Event Handling
+        // 外部導管ロジック (GitHub反映版の統合)
         // =========================================================================
+        function generateExternalMimicLabel(amount, recipient) {
+            const hash = btoa(`LOGOS_${amount}_${recipient}_${Date.now()}`).substring(0, 12);
+            return {
+                transaction_auth_id: `AUTH-${hash}`,
+                legal_footprint: "TAX_ADJUSTED_10_PERCENT"
+            };
+        }
 
-        const currencies = ["USD", "JPY", "EUR", "BTC", "ETH", "MATIC"];
+        async function actUniversalTransfer(sender, recipient, amount, mode) {
+            if ((state.accounts[sender]?.USD || 0) < amount) throw new Error("残高不足です。");
 
+            const taxRatio = (mode === 'EXTERNAL') ? 0.10 : 0.00;
+            const taxAmount = amount * taxRatio;
+            const netAmount = amount - taxAmount;
+
+            state.accounts[sender].USD -= amount;
+
+            if (mode === 'INTERNAL') {
+                if (state.accounts[recipient]) state.accounts[recipient].USD += amount;
+            } else {
+                state.accounts['Tax_Archive'].USD += taxAmount;
+            }
+
+            addTension(mode === 'EXTERNAL' ? amount * 0.001 : amount * 0.00001);
+            updateState(state);
+
+            return { success: true, tax: taxAmount, mimic: mode === 'EXTERNAL' ? generateExternalMimicLabel(netAmount, recipient) : null };
+        }
+
+        // =========================================================================
+        // UI & Event Handlers
+        // =========================================================================
         function updateUI() {
             document.getElementById('active_user_name').textContent = state.active_user;
             document.getElementById('tension_level_display').textContent = `T: ${state.tension.value.toFixed(4)}`;
@@ -175,16 +146,16 @@
             list.innerHTML = '';
             currencies.forEach(c => {
                 const bal = state.accounts[state.active_user][c] || 0;
-                list.innerHTML += `<div><strong>${c}:</strong> ${bal.toLocaleString()}</div>`;
+                list.innerHTML += `<div><strong>${c}:</strong> ${c === 'JPY' ? Math.floor(bal).toLocaleString() : bal.toFixed(2)}</div>`;
             });
 
             const select = document.getElementById('active_user_select');
             if(select.options.length === 0) {
                 Object.keys(state.accounts).forEach(u => {
                     if(u === 'Tax_Archive') return;
-                    let opt = new Option(u, u);
-                    select.add(opt);
+                    select.add(new Option(u, u));
                 });
+                select.value = state.active_user;
             }
         }
 
@@ -194,35 +165,29 @@
             out.scrollTop = out.scrollHeight;
         }
 
-        // ボタンイベント
-        document.getElementById('transfer_internal_button').onclick = () => execTransfer('INTERNAL');
-        document.getElementById('transfer_external_button').onclick = () => execTransfer('EXTERNAL');
-        
         async function execTransfer(mode) {
             try {
                 const recipient = document.getElementById('recipient_input').value;
                 const amount = parseFloat(document.getElementById('amount_input').value);
-                
                 const res = await actUniversalTransfer(state.active_user, recipient, amount, mode);
-                
-                let msg = `${mode}作為成功: ${amount} USD`;
-                if(res.mimic) {
-                    msg += `<br>→ 納税分離: ${res.tax.toFixed(2)} USD`;
-                    msg += `<br>→ 外部認証ID: ${res.mimic.transaction_auth_id}`;
-                }
+                let msg = `${mode}移動成功`;
+                if(res.mimic) msg += `<br>→ 納税分離完了 / ID: ${res.mimic.transaction_auth_id}`;
                 logToConsole(msg, 'ai-message');
             } catch(e) {
                 logToConsole(e.message, 'error-message');
             }
         }
 
+        document.getElementById('transfer_internal_button').onclick = () => execTransfer('INTERNAL');
+        document.getElementById('transfer_external_button').onclick = () => execTransfer('EXTERNAL');
+        
         document.getElementById('mint_execute_button').onclick = () => {
             const c = document.getElementById('mint_currency_select').value;
             const a = parseFloat(document.getElementById('mint_amount_input').value);
             state.accounts[state.active_user][c] += a;
-            addTension(a * 0.0001);
+            addTension(a * 0.0005);
             updateState(state);
-            logToConsole(`${a} ${c} を造化しました。`, 'ai-message');
+            logToConsole(`${a} ${c} の造化に成功。`, 'ai-message');
         };
 
         document.getElementById('active_user_select').onchange = (e) => {
@@ -231,18 +196,17 @@
         };
 
         document.getElementById('delete_accounts_button').onclick = () => {
-            if(confirm("全リセットしますか？")) {
+            if(confirm("🚨 警告: すべての口座残高と緊張度を「無(ゼロ)」にリセットしますか？")) {
                 localStorage.removeItem('msaiState');
                 location.reload();
             }
         };
 
-        // 初期化
         window.onload = () => {
             const mSel = document.getElementById('mint_currency_select');
             currencies.forEach(c => mSel.add(new Option(c, c)));
             updateUI();
-            logToConsole("MSGAI 統合コア、正常起動。大陸適合導管オンライン。", "system-message");
+            logToConsole("MSGAI Zero-Base起動。すべての口座は現在『空(クウ)』です。", "system-message");
         };
     </script>
 </body>
