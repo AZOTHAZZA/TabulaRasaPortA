@@ -6,7 +6,7 @@
     <title>MSGAI - ロゴス監査コンソール (Modular Orchestrator)</title>
     
     <style>
-        /* UIデザインの完全継承 */
+        /* UIデザイン：マスターの指定を完全継承 */
         body { display: flex; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background-color: #f0f0f0; }
         #sidebar { width: 350px; background-color: #fff; padding: 20px; box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); overflow-y: auto; height: 100vh; }
         #main-content { flex-grow: 1; padding: 20px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
@@ -75,65 +75,30 @@
     </div>
 
     <script type="module">
-        // 外部モジュールから純粋論理をインポート
-        // ※ファイル名とパスはリポジトリの分離状態を維持
+        // 1. 外部モジュールのインポート
+        import { 
+            getCurrentState, 
+            updateState, 
+            addTension, 
+            deleteAccounts,
+            INITIAL_ACCOUNTS 
+        } from './core/foundation.js';
+        
+        import { actMintCurrency } from './core/currency.js';
         import { actUniversalTransfer } from './core/external_finance_logos.js';
 
-        // =========================================================================
-        // 1. 基盤・状態管理 (State Management)
-        // =========================================================================
-        const INITIAL_ACCOUNTS = {
-            User_A: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 },
-            User_B: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 },
-            User_C: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 },
-            Tax_Archive: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 }
-        };
-
-        let state = JSON.parse(localStorage.getItem('msaiState')) || {
-            active_user: "User_A",
-            accounts: JSON.parse(JSON.stringify(INITIAL_ACCOUNTS)),
-            tension: { value: 0.0 }
-        };
+        // グローバル公開（外部モジュールが window 経由で state に触れるようにする）
+        window.getCurrentState = getCurrentState;
+        window.updateState = updateState;
+        window.addTension = addTension;
 
         const currencies = ["USD", "JPY", "EUR", "BTC", "ETH", "MATIC"];
 
-        // グローバル公開（外部JSモジュールがstateを共有・更新するため）
-        window.getCurrentState = () => state;
-        window.updateState = (newState) => {
-            state = newState;
-            localStorage.setItem('msaiState', JSON.stringify(state));
-            updateUI();
-        };
-        window.addTension = (val) => {
-            state.tension.value = Math.max(0, Math.min(0.5, state.tension.value + val));
-        };
-
         // =========================================================================
-        // 2. 自律対話エージェント (Autonomous Dialogue Agent)
-        // =========================================================================
-        function processAIResponse(input) {
-            const lowInput = input.toLowerCase();
-            let response = "";
-
-            if (lowInput.includes("生成") || lowInput.includes("造化") || lowInput.includes("mint")) {
-                const amount = 100;
-                state.accounts[state.active_user].USD += amount;
-                addTension(0.005);
-                response = `【自律造化完了】\nマスターの意志を検知。${state.active_user}の口座に ${amount} USD を造化しました。`;
-            } else if (lowInput.includes("状況") || lowInput.includes("ステータス")) {
-                response = `現在のロゴス緊張度は ${state.tension.value.toFixed(4)} です。\n全口座は規律に従い「完全ゼロ」からの再構築フェーズにあります。`;
-            } else {
-                response = "数理的解析中。具体的な通貨造化（Mint）や移動作為（Transfer）を指示してください。";
-            }
-            
-            updateState(state);
-            return response;
-        }
-
-        // =========================================================================
-        // 3. UI連携 & イベントハンドリング
+        // UI 更新ロジック
         // =========================================================================
         function updateUI() {
+            const state = getCurrentState();
             document.getElementById('active_user_name').textContent = state.active_user;
             document.getElementById('tension_level_display').textContent = `T: ${state.tension.value.toFixed(4)}`;
             document.getElementById('tension_level_display_bar').style.width = `${(state.tension.value / 0.5) * 100}%`;
@@ -164,14 +129,17 @@
             out.scrollTop = out.scrollHeight;
         }
 
-        // 送金実行（外部モジュールの actUniversalTransfer を使用）
+        // =========================================================================
+        // イベントハンドラー
+        // =========================================================================
+
+        // 送金実行
         async function runTransfer(mode) {
             try {
                 const recipient = document.getElementById('recipient_input').value;
                 const amount = parseFloat(document.getElementById('amount_input').value);
-                const sender = state.active_user;
+                const sender = getCurrentState().active_user;
 
-                // 外部ファイル(external_finance_logos.js)の知性を発動
                 const res = await actUniversalTransfer(sender, recipient, amount, mode);
 
                 if (res.success) {
@@ -188,44 +156,60 @@
             }
         }
 
-        // イベントリスナー紐付け
+        // 通貨生成（Mint）
+        document.getElementById('mint_execute_button').onclick = () => {
+            try {
+                const c = document.getElementById('mint_currency_select').value;
+                const a = parseFloat(document.getElementById('mint_amount_input').value);
+                const user = getCurrentState().active_user;
+                
+                actMintCurrency(user, c, a);
+                logToConsole(`${a} ${c} の造化に成功しました。`, 'ai-message');
+                updateUI();
+            } catch (error) {
+                logToConsole(error.message, 'error-message');
+            }
+        };
+
+        // 自律対話
         document.getElementById('dialogue_button').onclick = () => {
             const input = document.getElementById('dialogue_input').value;
             if(!input) return;
             logToConsole(input, 'user-message');
             document.getElementById('dialogue_input').value = '';
-            setTimeout(() => logToConsole(processAIResponse(input), 'ai-message'), 500);
+            
+            // 簡易対話エンジン
+            setTimeout(() => {
+                let response = "解析中... 為替交換や送金の具体的な数値を指示してください。";
+                if(input.includes("造化") || input.includes("生成")) response = "造化プロトコルはサイドバーから実行可能です。";
+                logToConsole(response, 'ai-message');
+            }, 500);
         };
 
         document.getElementById('transfer_internal_button').onclick = () => runTransfer('INTERNAL');
         document.getElementById('transfer_external_button').onclick = () => runTransfer('EXTERNAL');
-        
-        document.getElementById('mint_execute_button').onclick = () => {
-            const c = document.getElementById('mint_currency_select').value;
-            const a = parseFloat(document.getElementById('mint_amount_input').value);
-            state.accounts[state.active_user][c] += a;
-            addTension(a * 0.0005);
-            updateState(state);
-            logToConsole(`${a} ${c} の手動造化完了。`, 'ai-message');
-        };
 
         document.getElementById('active_user_select').onchange = (e) => {
+            const state = getCurrentState();
             state.active_user = e.target.value;
             updateState(state);
+            updateUI();
         };
 
         document.getElementById('delete_accounts_button').onclick = () => {
             if(confirm("🚨 全口座と緊張度を「無」へ戻しますか？")) {
-                localStorage.removeItem('msaiState');
+                deleteAccounts();
                 location.reload();
             }
         };
 
-        // 初期化
-        const mSel = document.getElementById('mint_currency_select');
-        currencies.forEach(c => mSel.add(new Option(c, c)));
-        updateUI();
-        logToConsole("MSGAI Orchestrator オンライン。モジュール分離構造を検知。", "system-message");
+        // 初期化実行
+        window.addEventListener('DOMContentLoaded', () => {
+            const mSel = document.getElementById('mint_currency_select');
+            currencies.forEach(c => mSel.add(new Option(c, c)));
+            updateUI();
+            logToConsole("MSGAI Orchestrator オンライン。モジュール分離構造を確認。", "system-message");
+        });
     </script>
 </body>
 </html>
