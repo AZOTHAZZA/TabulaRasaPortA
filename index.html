@@ -3,62 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSGAI - Sovereign V25.0</title>
+    <title>MSGAI - Sovereign V26.0</title>
     <style>
         :root { --accent: #007bff; --bg: #f0f2f5; --card-bg: #ffffff; --text: #1a1a1a; --nav-bg: #111111; }
-        body { font-family: 'Segoe UI', 'BIZ UDゴシック', -apple-system, sans-serif; margin: 0; background-color: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body { font-family: 'Segoe UI', 'BIZ UDゴシック', sans-serif; margin: 0; background-color: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* 2段構造のヘッダー設計 */
         header { background: var(--nav-bg); color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; }
-        
-        /* 1段目：ブランド・タイトル */
-        .header-top { 
-            display: flex; justify-content: center; align-items: center; 
-            padding: 15px 0; border-bottom: 1px solid #333;
-        }
+        .header-top { display: flex; justify-content: center; align-items: center; padding: 15px 0; border-bottom: 1px solid #333; position: relative; }
         .logo-text { font-size: 1.4em; font-weight: bold; letter-spacing: 5px; color: var(--accent); }
+        
+        /* クイック統計（全画面共通） */
+        .quick-stats { position: absolute; right: 20px; font-family: monospace; font-size: 0.85em; color: #aaa; text-align: right; }
 
-        /* 2段目：タブ・ナビゲーション（ここを大きく、見やすく） */
-        .tab-menu { 
-            display: flex; justify-content: center; background: #1e1e1e; 
-            overflow-x: auto; white-space: nowrap;
-        }
+        .tab-menu { display: flex; justify-content: center; background: #1e1e1e; }
         .tab-btn { 
-            background: none; border: none; color: #999; padding: 15px 30px; 
-            cursor: pointer; font-weight: bold; font-size: 1.05em; transition: 0.3s;
-            border-bottom: 4px solid transparent; min-width: 160px;
+            background: none; border: none; color: #888; padding: 18px 40px; 
+            cursor: pointer; font-weight: bold; font-size: 1.1em; transition: 0.3s;
+            border-bottom: 4px solid transparent; min-width: 200px;
         }
-        .tab-btn:hover { color: #fff; background: #2a2a2a; }
         .tab-btn.active { color: #fff; border-bottom: 4px solid var(--accent); background: #252525; }
 
-        /* メインビューポート */
         #viewport { flex-grow: 1; overflow-y: auto; padding: 30px; box-sizing: border-box; display: flex; justify-content: center; }
-        .tab-pane { display: none; width: 100%; max-width: 1100px; animation: fadeIn 0.4s ease; }
+        .tab-pane { display: none; width: 100%; max-width: 1100px; animation: fadeIn 0.3s ease; }
         .tab-pane.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* UIコンポーネント */
-        .card { background: var(--card-bg); border-radius: 12px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #ddd; margin-bottom: 25px; }
-        h2 { margin-top: 0; border-left: 6px solid var(--accent); padding-left: 15px; font-size: 1.4em; margin-bottom: 20px; color: #222; }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #ddd; margin-bottom: 20px; }
+        h2 { margin-top: 0; border-left: 6px solid var(--accent); padding-left: 15px; font-size: 1.3em; margin-bottom: 20px; }
 
-        /* 監査グリッド */
-        .audit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .metric { background: #f8f9fa; padding: 25px; border-radius: 10px; border: 1px solid #eee; text-align: center; }
-        .metric-label { font-size: 0.85em; color: #666; font-weight: bold; display: block; margin-bottom: 8px; }
-        .metric-value { font-size: 2em; font-weight: bold; font-family: 'Consolas', monospace; color: #000; }
+        .audit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; }
+        .metric { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #eee; text-align: center; }
+        .metric-label { font-size: 0.8em; color: #666; font-weight: bold; display: block; }
+        .metric-value { font-size: 1.6em; font-weight: bold; font-family: 'Consolas', monospace; }
 
-        /* 入力・操作 */
-        .control-group { margin-bottom: 20px; }
-        label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 0.9em; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1.1em; box-sizing: border-box; }
-        .action-btn { width: 100%; padding: 15px; border: none; border-radius: 6px; color: #fff; font-weight: bold; font-size: 1.1em; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .action-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-        .action-btn:active { transform: translateY(1px); }
+        .control-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.85em; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: monospace; }
+        
+        .action-btn { width: 100%; padding: 12px; border: none; border-radius: 6px; color: #fff; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-mint { background: #fd7e14; }
+        .btn-flow { background: var(--accent); }
 
-        /* AIチャット */
-        #ai-log { height: 450px; overflow-y: auto; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; padding: 20px; margin-bottom: 15px; font-family: 'Consolas', monospace; font-size: 0.95em; }
-        .msg { margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; }
-        .msg.ai { color: var(--accent); border-left: 4px solid var(--accent); padding-left: 15px; background: #f0f7ff; padding: 10px; border-radius: 0 8px 8px 0; }
+        #ai-log { height: 400px; overflow-y: auto; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; padding: 15px; margin-bottom: 15px; font-family: monospace; }
+        .msg.ai { color: var(--accent); border-left: 4px solid var(--accent); padding-left: 15px; background: #f0f7ff; padding: 10px; margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -66,86 +53,69 @@
     <header>
         <div class="header-top">
             <div class="logo-text">MSGAI SOVEREIGN</div>
+            <div class="quick-stats">
+                T: <span id="q_t">0.000000</span><br>
+                w: <span id="q_w">0.00</span>
+            </div>
         </div>
         <nav class="tab-menu">
-            <button class="tab-btn active" onclick="openTab('monitor')">監査主モニター</button>
-            <button class="tab-btn" onclick="openTab('flow')">循環・移動</button>
-            <button class="tab-btn" onclick="openTab('mint')">通貨造化</button>
-            <button class="tab-btn" onclick="openTab('ai')">LOGOS (AI)</button>
-            <button class="tab-btn" onclick="openTab('sys')">システム設定</button>
+            <button class="tab-btn active" onclick="openTab('currency')">通貨 (作為/監査)</button>
+            <button class="tab-btn" onclick="openTab('ai')">LOGOS (対話)</button>
+            <button class="tab-btn" onclick="openTab('system')">システム (基盤)</button>
         </nav>
     </header>
 
     <main id="viewport">
-        <section id="monitor" class="tab-pane active">
+        <section id="currency" class="tab-pane active">
             <div class="card">
-                <h2>REAL-TIME METRICS</h2>
-                <div class="audit-grid">
-                    <div class="metric">
-                        <span class="metric-label">根源緊張度 (Tension)</span>
-                        <span class="metric-value" id="t_val">0.000000</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">造化比率 (w = 1/z)</span>
-                        <span class="metric-value" id="w_val">0.00</span>
-                    </div>
-                </div>
-                <div style="margin-top:25px; background:#e9ecef; height:15px; border-radius:10px; overflow:hidden;">
-                    <div id="t_bar" style="width:0%; height:100%; background:linear-gradient(90deg, #28a745, #dc3545); transition: 0.5s;"></div>
-                </div>
-            </div>
-            <div class="card">
-                <h2>ASSET AUDIT LIST</h2>
+                <h2>ASSET AUDIT LIST (資産監査)</h2>
                 <div id="bal_list" class="audit-grid"></div>
             </div>
-        </section>
-
-        <section id="flow" class="tab-pane">
-            <div class="card">
-                <h2>III. 循環・移動プロトコル</h2>
-                <div class="audit-grid">
-                    <div class="control-group">
-                        <label>受取対象</label>
-                        <input type="text" id="rx_in" value="User_B">
-                    </div>
-                    <div class="control-group">
-                        <label>数量 (USD)</label>
-                        <input type="number" id="amt_in" value="10.00">
-                    </div>
+            <div class="audit-grid">
+                <div class="card">
+                    <h2>III. 循環・移動</h2>
+                    <label>受取ユーザー</label>
+                    <input type="text" id="rx_in" value="User_B">
+                    <label style="margin-top:10px;">数量 (USD)</label>
+                    <input type="number" id="amt_in" value="10.00">
+                    <button class="action-btn btn-flow" style="margin-top:15px;" onclick="runTx()">内部循環実行</button>
                 </div>
-                <button class="action-btn" style="background:var(--accent);" onclick="runTx()">内部循環を実行</button>
-            </div>
-        </section>
-
-        <section id="mint" class="tab-pane">
-            <div class="card">
-                <h2>IV. 通貨造化実行エリア</h2>
-                <div class="audit-grid">
-                    <div class="control-group">
-                        <label>対象通貨</label>
-                        <select id="m_cur"></select>
-                    </div>
-                    <div class="control-group">
-                        <label>生成数量</label>
-                        <input type="number" id="m_amt" value="100">
-                    </div>
+                <div class="card">
+                    <h2>IV. 通貨造化</h2>
+                    <label>対象通貨</label>
+                    <select id="m_cur"></select>
+                    <label style="margin-top:10px;">生成数量</label>
+                    <input type="number" id="m_amt" value="100">
+                    <button class="action-btn btn-mint" style="margin-top:15px;" onclick="runMint()">造化実行</button>
                 </div>
-                <button class="action-btn" style="background:#fd7e14;" onclick="runMint()">通貨造化プロセス開始</button>
             </div>
         </section>
 
         <section id="ai" class="tab-pane">
             <div class="card">
-                <h2>VIII. LOGOS COUNSELING SYSTEM</h2>
+                <h2>VIII. LOGOS COUNSELING</h2>
                 <div id="ai-log"></div>
                 <div style="display:flex; gap:10px;">
-                    <input type="text" id="ai-in" placeholder="アルケーへの問いかけを入力...">
-                    <button class="action-btn" style="background:#4b0082; width:140px;" onclick="talk()">送信</button>
+                    <input type="text" id="ai-in" placeholder="アルケーへの命令...">
+                    <button class="action-btn btn-flow" style="width:120px;" onclick="talk()">送信</button>
                 </div>
             </div>
         </section>
 
-        <section id="sys" class="tab-pane">
+        <section id="system" class="tab-pane">
+            <div class="card">
+                <h2>ROOT MONITOR (根源監視)</h2>
+                <div class="audit-grid">
+                    <div class="metric">
+                        <span class="metric-label">Tension</span>
+                        <span class="metric-value" id="t_val">0.000000</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Logos Ratio (w)</span>
+                        <span class="metric-value" id="w_val">0.00</span>
+                    </div>
+                </div>
+            </div>
             <div class="card">
                 <h2>SYSTEM CONFIG</h2>
                 <button class="action-btn" style="background:#6c757d;" onclick="fullReset()">データベース完全抹消</button>
@@ -155,7 +125,7 @@
 
     <script>
         const curs = ["USD", "JPY", "EUR", "BTC", "ETH", "MATIC"];
-        let state = JSON.parse(localStorage.getItem('msgai_v25')) || {
+        let state = JSON.parse(localStorage.getItem('msgai_v26')) || {
             tension: 0.05, accounts: { User_A: { USD: 100, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 } }
         };
 
@@ -167,13 +137,17 @@
         };
 
         function update() {
-            document.getElementById('t_val').textContent = state.tension.toFixed(6);
-            document.getElementById('w_val').textContent = (1/(state.tension||0.000001)).toFixed(2);
-            document.getElementById('t_bar').style.width = `${Math.min(100, state.tension * 200)}%`;
+            const w = (1/(state.tension||0.000001)).toFixed(2);
+            document.getElementById('q_t').textContent = state.tension.toFixed(6);
+            document.getElementById('q_w').textContent = w;
+            if(document.getElementById('t_val')) {
+                document.getElementById('t_val').textContent = state.tension.toFixed(6);
+                document.getElementById('w_val').textContent = w;
+            }
             document.getElementById('bal_list').innerHTML = curs.map(c => 
-                `<div class="metric"><span class="metric-label">${c}</span><span class="metric-value" style="font-size:1.3em;">${(state.accounts.User_A[c]||0).toLocaleString()}</span></div>`
+                `<div class="metric"><span class="metric-label">${c}</span><span class="metric-value" style="font-size:1.2em;">${(state.accounts.User_A[c]||0).toLocaleString()}</span></div>`
             ).join('');
-            localStorage.setItem('msgai_v25', JSON.stringify(state));
+            localStorage.setItem('msgai_v26', JSON.stringify(state));
         }
 
         setInterval(update, 500);
@@ -188,8 +162,8 @@
             const i = document.getElementById('ai-in').value;
             const log = document.getElementById('ai-log');
             if(!i) return;
-            log.innerHTML += `<div class="msg"><strong>Master:</strong> ${i}</div>`;
-            log.innerHTML += `<div class="msg ai"><strong>Logos:</strong> 命を受けました。Tension調整を含む動的監査をバックグラウンドで開始します。</div>`;
+            log.innerHTML += `<div><strong>Master:</strong> ${i}</div>`;
+            log.innerHTML += `<div class="msg ai"><strong>Logos:</strong> 了解。作為をシステム深層へ反映します。</div>`;
             document.getElementById('ai-in').value = '';
             log.scrollTop = log.scrollHeight;
         };
