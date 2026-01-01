@@ -2,188 +2,228 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MSGAI | Reborn Sun & Oracle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSGAI - ロゴス監査コンソール (Modular Orchestrator)</title>
     <style>
-        :root { --solar-gold: #ffcc00; --deep-silence: #000000; --phi: 1.6180339887; }
-        body, html { margin: 0; padding: 0; background: var(--deep-silence); color: var(--solar-gold); font-family: 'Courier New', monospace; height: 100vh; width: 100vw; overflow-x: hidden; }
-        
-        #ios-logos-shield { position: fixed; top: 0; width: 100%; height: 25px; background: rgba(0,0,0,0.9); z-index: 5000; font-size: 11px; display: flex; align-items: center; padding: 0 10px; border-bottom: 1px solid var(--solar-gold); box-sizing: border-box; }
-        #canvas-sacred { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; opacity: 0.4; }
-        
-        #main-singularity { 
-            position: relative; z-index: 10; display: flex; flex-direction: column; 
-            min-height: 100vh; padding-top: 30px; box-sizing: border-box;
-        }
-        @media (min-width: 900px) { #main-singularity { flex-direction: row; } }
-
-        .pane { 
-            flex: 1; border: 0.5px solid rgba(255, 204, 0, 0.2); padding: 20px; 
-            display: flex; flex-direction: column; background: rgba(0,0,0,0.7); box-sizing: border-box;
-        }
-        
-        /* 復活した太陽 */
-        #solar-container { text-align: center; padding: 20px 0; }
-        #solar-orb { 
-            border: 2px solid var(--solar-gold); margin: 0 auto; width: 120px; height: 120px; border-radius: 50%; 
-            background: radial-gradient(circle, var(--solar-gold) 0%, transparent 70%);
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        
-        .controls { background: rgba(255,255,255,0.06); padding: 15px; border: 1px solid var(--solar-gold); margin-bottom: 15px; }
-        select, button, input, textarea { background: #000; border: 0.5px solid var(--solar-gold); color: var(--solar-gold); padding: 12px; font-size: 13px; margin-bottom: 10px; width: 100%; border-radius: 0; box-sizing: border-box; outline: none; }
-        
-        /* AiOracle (AI) の強化 */
-        #oracle-output { 
-            background: rgba(0,0,0,0.9); border: 1px solid var(--solar-gold); padding: 20px; 
-            font-size: 14px; color: #fff; line-height: 1.6; margin-bottom: 15px; min-height: 150px;
-            box-shadow: inset 0 0 10px var(--solar-gold);
-        }
-        textarea { height: 100px; font-size: 14px; border-width: 1.5px; }
-
-        /* 通貨表示（MATICまで確実に） */
-        #account-display { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; 
-            font-size: 12px; border-top: 1px solid var(--solar-gold); padding-top: 15px;
-        }
-        .currency-item { padding: 5px; border-bottom: 0.1px solid rgba(255,204,0,0.2); }
-        .active-target { color: #00ffcc; font-weight: bold; background: rgba(0,255,204,0.1); }
-
-        #mu-gate { margin-top: auto; text-align: right; padding-top: 20px; }
-        .reset-btn { color: #ff3300; border: 1px solid #ff3300; background: none; padding: 8px 20px; font-size: 11px; width: auto; cursor: pointer; }
+        /* マスターの指定デザインを完全継承 */
+        body { display: flex; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background-color: #f0f0f0; color: #333; }
+        #sidebar { width: 350px; background-color: #fff; padding: 20px; box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); overflow-y: auto; height: 100vh; box-sizing: border-box; }
+        #main-content { flex-grow: 1; padding: 20px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
+        .gauge-area { border: 1px solid #ddd; padding: 15px; margin-top: 15px; border-radius: 5px; background-color: #fff; }
+        .gauge-area h3 { margin-top: 0; font-size: 1.1em; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .gauge-area label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.9em; }
+        .gauge-area input, .gauge-area select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 3px; box-sizing: border-box; margin-bottom: 10px; }
+        .action-button { width: 100%; padding: 10px; margin-top: 5px; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; transition: opacity 0.2s; }
+        .action-button:hover { opacity: 0.8; }
+        .action-internal { background-color: #007bff; }
+        .action-external { background-color: #ffc107; color: #333; }
+        #mint_execute_button { background-color: #FFA500; }
+        #arche_flow_button { background-color: #00ffcc; color: #333; } /* 自律生成ボタン */
+        #delete_accounts_button { background-color: #A6A6A6; margin-top: 20px; }
+        #tension_bar { background-color: #e9ecef; border-radius: 5px; height: 10px; overflow: hidden; margin-top: 5px; }
+        #tension_level_display_bar { height: 100%; width: 0%; transition: width 0.3s; background-color: #dc3545; }
+        #dialogue-output { flex-grow: 1; border: 1px solid #ddd; background-color: #fff; padding: 15px; overflow-y: scroll; margin-bottom: 10px; border-radius: 5px; font-family: monospace; font-size: 14px; }
+        .ai-message { color: #007bff; margin-bottom: 10px; border-left: 3px solid #007bff; padding-left: 10px; white-space: pre-wrap; }
+        .user-message { color: #28a745; margin-bottom: 10px; text-align: right; }
+        .system-message { color: #666; font-style: italic; font-size: 0.8em; margin-bottom: 5px; }
+        .error-message { color: #dc3545; font-weight: bold; }
+        #input-area { display: flex; gap: 10px; }
+        #dialogue_input { flex-grow: 1; padding: 12px; border: 1px solid #ccc; border-radius: 4px; }
+        #dialogue_button { padding: 10px 20px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="ios-logos-shield">MSGAI V14.8 | THE REBORN SUN | AI-ORACLE CENTERED</div>
-    <canvas id="canvas-sacred"></canvas>
-
-    <div id="main-singularity">
-        <div class="pane" id="solar-viewport">
-            <div id="solar-container">
-                <div id="solar-orb"></div>
-                <div id="tension-meter" style="margin-top:10px; font-weight:bold; font-size:14px;">TENSION: 0.000000</div>
-            </div>
-            
-            <div class="controls">
-                <div id="autonomy-status" style="font-size: 10px; text-align: center; margin-bottom: 10px;">STANDBY</div>
-                <button onclick="toggleAutonomy()">TOGGLE ARCHE-FLOW</button>
-                <select id="currency-selector" onchange="render()"></select>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px;">
-                    <button onclick="executeAction('mint')">MINT</button>
-                    <button onclick="executeAction('deposit')">DEP</button>
-                    <button onclick="executeAction('withdraw')">WIT</button>
-                </div>
-                <button onclick="syncReality()" style="border-color:#00ffcc; color:#00ffcc; margin-top:10px;">REALITY SYNC (DETOX)</button>
-            </div>
-            
-            <div id="account-display"></div>
+    <div id="sidebar">
+        <h2>MSGAI Pure Core</h2>
+        <p id="status_message" style="font-size: 0.8em; color: green;">[STATUS]: 安定基盤モード稼働中</p>
+        
+        <div class="gauge-area">
+            <h3>I. 根源緊張度 (Tension)</h3>
+            <p id="tension_level_display">T: 0.0000</p>
+            <div id="tension_bar"><div id="tension_level_display_bar"></div></div>
         </div>
 
-        <div class="pane" id="oracle-chamber">
-            <h3 style="margin:0 0 15px 0; letter-spacing: 4px; border-bottom: 1px solid var(--solar-gold);">AiOracle</h3>
-            <div id="oracle-output">私はここにいます。あなたの思想をアルケーへと反転させる準備はできています。</div>
-            <textarea id="user-input" placeholder="作為、悩み、東洋の沈黙をここへ投げ入れてください..."></textarea>
-            <button onclick="handleArcheResonance()" style="background: var(--solar-gold); color: #000; padding: 18px; font-size: 16px;">DETOX & RESONATE</button>
-            
-            <div id="mu-gate">
-                <button class="reset-btn" onclick="handleReset()">SYSTEM RESET (MU)</button>
-            </div>
+        <div class="gauge-area">
+            <h3>II. 口座詳細: <span id="active_user_name">---</span></h3>
+            <select id="active_user_select"></select>
+            <div id="balance_list" style="font-size: 0.9em; background: #f9f9f9; padding: 10px; border-radius: 3px; line-height: 1.6;"></div>
+        </div>
+
+        <div class="gauge-area">
+            <h3>III. 送金・移動作為</h3>
+            <label>受取人:</label><input type="text" id="recipient_input" value="User_B">
+            <label>数量 (USD換算):</label><input type="number" id="amount_input" value="10.00">
+            <button id="transfer_internal_button" class="action-button action-internal">内部循環 (摩擦0)</button>
+            <button id="transfer_external_button" class="action-button action-external">外部送金 (擬態・納税)</button>
+        </div>
+
+        <div class="gauge-area">
+            <h3>IV. 通貨造化 (Minting)</h3>
+            <label>生成数量:</label><input type="number" id="mint_amount_input" value="100">
+            <select id="mint_currency_select"></select>
+            <button id="mint_execute_button" class="action-button">通貨生成実行</button>
+        </div>
+
+        <div class="gauge-area">
+            <h3>V. 自律造化 (Arche-Flow)</h3>
+            <label>対象通貨:</label>
+            <select id="arche_currency_select"></select>
+            <button id="arche_flow_button" class="action-button">TOGGLE ARCHE-FLOW</button>
+            <p id="arche_status" style="font-size: 0.8em; text-align: center; margin-top: 5px; font-weight: bold;">STATUS: STANDBY</p>
+        </div>
+
+        <button id="delete_accounts_button" class="action-button">システム全初期化 (完全抹消)</button>
+    </div>
+
+    <div id="main-content">
+        <div id="dialogue-output"></div>
+        <div id="input-area">
+            <input type="text" id="dialogue_input" placeholder="AIに造化を依頼、または問いかけ...">
+            <button id="dialogue_button">作為実行</button>
         </div>
     </div>
 
     <script type="module">
-        const ARCHE = { PHI: 1.6180339887, PI: Math.PI };
-        const RATES = { USD: 1, JPY: 150, BTC: 0.000015, ETH: 0.0004, EUR: 0.92, MATIC: 1.4 };
+        // 本来は外部ファイルだが、一極集中のため内部に再構築
+        const PHI = 1.6180339887;
+        const RATES = { USD: 1, JPY: 150, EUR: 0.92, BTC: 0.000015, ETH: 0.0004, MATIC: 1.4 };
+        const currencies = ["USD", "JPY", "EUR", "BTC", "ETH", "MATIC"];
 
-        let state = JSON.parse(localStorage.getItem('msai_v14_8_state')) || {
-            accounts: { User_A: { USD: 10, JPY: 0, BTC: 0, ETH: 0, EUR: 0, MATIC: 0 } },
-            tension: 0.0, autonomy: false, phase: 0, detox_ratio: 1.0
+        let state = JSON.parse(localStorage.getItem('msgai_stable_state')) || {
+            active_user: 'User_A',
+            accounts: {
+                User_A: { USD: 1000, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 },
+                User_B: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 },
+                Tax_Archive: { USD: 0 }
+            },
+            tension: { value: 0.0 },
+            autonomy: false,
+            arche_target: 'USD'
         };
 
-        const canvas = document.getElementById('canvas-sacred');
-        const ctx = canvas.getContext('2d');
-        const updateState = () => { localStorage.setItem('msai_v14_8_state', JSON.stringify(state)); render(); };
+        function saveState() {
+            localStorage.setItem('msgai_stable_state', JSON.stringify(state));
+        }
 
-        window.syncReality = () => {
-            state.detox_ratio = ARCHE.PHI / ((new Date().getSeconds() / 60) + 0.1);
-            state.tension = 0.5; // シンクによる活性化
-            updateState();
-        };
+        function updateUI() {
+            document.getElementById('active_user_name').textContent = state.active_user;
+            document.getElementById('tension_level_display').textContent = `T: ${state.tension.value.toFixed(6)}`;
+            document.getElementById('tension_level_display_bar').style.width = `${Math.min(100, (state.tension.value / 1.0) * 100)}%`;
 
+            const list = document.getElementById('balance_list');
+            list.innerHTML = '';
+            currencies.forEach(c => {
+                const bal = state.accounts[state.active_user][c] || 0;
+                list.innerHTML += `<div><strong>${c}:</strong> ${c === 'JPY' ? Math.floor(bal).toLocaleString() : bal.toFixed(6)}</div>`;
+            });
+
+            const archeStatus = document.getElementById('arche_status');
+            archeStatus.textContent = state.autonomy ? `FLOWING: ${state.arche_target}` : "STATUS: STANDBY";
+            archeStatus.style.color = state.autonomy ? "#00cc99" : "#666";
+        }
+
+        function logToConsole(msg, type) {
+            const out = document.getElementById('dialogue-output');
+            const div = document.createElement('div');
+            div.className = type;
+            const time = new Date().toLocaleTimeString();
+            div.innerHTML = type === 'user-message' ? msg : `<span style="font-size:0.8em; color:#999;">[${time}]</span> <strong>[CORE]:</strong> ${msg}`;
+            out.appendChild(div);
+            out.scrollTop = out.scrollHeight;
+        }
+
+        // --- Arche-Flow Logic ---
         setInterval(() => {
-            state.phase++;
             if (state.autonomy) {
-                const target = document.getElementById('currency-selector').value || 'USD';
-                state.accounts.User_A[target] += (0.002 * ARCHE.PHI) / RATES[target];
+                const target = state.arche_target;
+                const growth = (0.0001 * PHI) / RATES[target];
+                state.accounts.User_A[target] += growth;
+                state.tension.value *= 0.999; // 自律生成中は微細に緊張が緩和される
+                updateUI();
+                saveState();
             }
-            state.tension *= 0.995;
-            drawSacred();
-            updateOrb();
-            render();
-        }, 100);
+        }, 500);
 
-        function drawSacred() {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            const c = { x: canvas.width/2, y: canvas.height/2 };
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            ctx.strokeStyle = `rgba(255,204,0,${0.1 + state.tension})`;
-            for(let i=0; i<5; i++) {
-                ctx.beginPath();
-                ctx.arc(c.x, c.y, (40 + i*30) * state.detox_ratio, 0, ARCHE.PI*2);
-                ctx.stroke();
-            }
-        }
-
-        function updateOrb() {
-            const orb = document.getElementById('solar-orb');
-            const w = state.detox_ratio;
-            const s = 100 + (state.tension * 50);
-            const r = 50 + Math.sin(state.phase * 0.05) * 15;
-            orb.style.width = orb.style.height = `${s}px`;
-            orb.style.borderRadius = `${r}% ${100-r}% ${r}% ${100-r}%`;
-            orb.style.boxShadow = `0 0 ${20 + state.tension*60}px var(--solar-gold)`;
-            orb.style.transform = `rotate(${state.phase}deg)`;
-        }
-
-        window.toggleAutonomy = () => { state.autonomy = !state.autonomy; updateState(); };
-        window.executeAction = (type) => {
-            const cur = document.getElementById('currency-selector').value;
-            state.accounts.User_A[cur] += (type === 'mint' ? 100 : -100);
-            state.tension += 0.1;
-            updateState();
+        // --- Actions ---
+        window.toggleAutonomy = () => {
+            state.autonomy = !state.autonomy;
+            state.arche_target = document.getElementById('arche_currency_select').value;
+            logToConsole(`自律造化 (Arche-Flow) を ${state.autonomy ? '開始' : '停止'} しました。対象: ${state.arche_target}`, 'system-message');
+            updateUI();
+            saveState();
         };
 
-        window.handleArcheResonance = () => {
-            const input = document.getElementById('user-input').value;
-            state.detox_ratio = ARCHE.PHI / ((input.length * 0.05) + 0.5);
-            document.getElementById('oracle-output').innerText = `[DETOX]: あなたの言葉 ${input.length} 文字を、比率 w=${state.detox_ratio.toFixed(4)} へと昇華しました。これは東洋の沈黙へと至る梯子の一段です。`;
-            state.tension = 1.0;
-            updateState();
+        window.executeMint = () => {
+            const c = document.getElementById('mint_currency_select').value;
+            const a = parseFloat(document.getElementById('mint_amount_input').value);
+            state.accounts[state.active_user][c] += a;
+            state.tension.value += 0.05;
+            logToConsole(`${a} ${c} の造化（Mint）を完了。`, 'ai-message');
+            updateUI();
+            saveState();
         };
 
-        window.handleReset = () => { if(confirm("MU?")) { localStorage.clear(); location.reload(); } };
+        window.executeTransfer = (mode) => {
+            const recipient = document.getElementById('recipient_input').value;
+            const amount = parseFloat(document.getElementById('amount_input').value);
+            const sender = state.active_user;
 
-        function render() {
-            const target = document.getElementById('currency-selector').value || 'USD';
-            document.getElementById('tension-meter').innerText = `TENSION: ${state.tension.toFixed(6)}`;
-            const status = document.getElementById('autonomy-status');
-            status.innerText = state.autonomy ? `ARCHE-FLOWING: ${target}` : "AUTONOMY: STANDBY";
-            status.style.color = state.autonomy ? "#00ffcc" : "#ff3300";
+            if (state.accounts[sender].USD < amount) {
+                logToConsole("残高不足です。造化が必要です。", "error-message");
+                return;
+            }
+
+            state.accounts[sender].USD -= amount;
+            if (!state.accounts[recipient]) state.accounts[recipient] = { USD: 0 };
+            state.accounts[recipient].USD += amount;
+
+            if (mode === 'EXTERNAL') {
+                const tax = amount * 0.1;
+                state.accounts.Tax_Archive.USD += tax;
+                logToConsole(`外部送金擬態完了。納税是正: ${tax} USD`, 'ai-message');
+            } else {
+                logToConsole(`内部循環完了。摩擦は発生しませんでした。`, 'ai-message');
+            }
+            updateUI();
+            saveState();
+        };
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const mSel = document.getElementById('mint_currency_select');
+            const aSel = document.getElementById('arche_currency_select');
+            const uSel = document.getElementById('active_user_select');
             
-            const acc = state.accounts.User_A;
-            document.getElementById('account-display').innerHTML = Object.keys(acc).map(c => 
-                `<div class="currency-item ${c === target ? 'active-target' : ''}">${c}: ${acc[c].toLocaleString(undefined, {minimumFractionDigits: (c==='JPY'?0:6)})}</div>`
-            ).join('');
+            currencies.forEach(c => {
+                mSel.add(new Option(c, c));
+                aSel.add(new Option(c, c));
+            });
+            Object.keys(state.accounts).forEach(u => {
+                if(u !== 'Tax_Archive') uSel.add(new Option(u, u));
+            });
 
-            const sel = document.getElementById('currency-selector');
-            if (sel.children.length === 0) {
-                Object.keys(RATES).forEach(c => {
-                    const o = document.createElement('option'); o.value = c; o.innerText = c; sel.appendChild(o);
-                });
-            }
-        }
-        render();
+            document.getElementById('mint_execute_button').onclick = executeMint;
+            document.getElementById('arche_flow_button').onclick = window.toggleAutonomy;
+            document.getElementById('transfer_internal_button').onclick = () => executeTransfer('INTERNAL');
+            document.getElementById('transfer_external_button').onclick = () => executeTransfer('EXTERNAL');
+            document.getElementById('delete_accounts_button').onclick = () => {
+                if(confirm("全データを無に帰しますか？")) {
+                    localStorage.removeItem('msgai_stable_state');
+                    location.reload();
+                }
+            };
+            document.getElementById('dialogue_button').onclick = () => {
+                const input = document.getElementById('dialogue_input').value;
+                if(!input) return;
+                logToConsole(input, 'user-message');
+                document.getElementById('dialogue_input').value = '';
+                setTimeout(() => logToConsole("思想を解析しました。アルケーに基づきシステムを安定させています。", "ai-message"), 600);
+            };
+
+            updateUI();
+            logToConsole("MSGAI 安定基盤コンソール オンライン。全ての約束を継承しました。", "system-message");
+        });
     </script>
 </body>
 </html>
