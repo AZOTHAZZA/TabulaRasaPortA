@@ -3,21 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSGAI - Sovereign V27.0</title>
+    <title>MSGAI - Sovereign V28.0</title>
     <style>
-        :root { --accent: #007bff; --bg: #f2f4f7; --card-bg: #ffffff; --nav-bg: #000; }
+        :root { --accent: #007bff; --bg: #f4f7f9; --card-bg: #ffffff; --nav-bg: #000; }
         body { font-family: 'Segoe UI', 'BIZ UDゴシック', sans-serif; margin: 0; background-color: var(--bg); color: #1a1a1a; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* ヘッダー：極限までシンプルに */
+        /* ヘッダー：重なりを排除しロゴのみを純粋に表示 */
         header { background: var(--nav-bg); color: #fff; z-index: 100; }
-        .header-top { display: flex; justify-content: center; align-items: center; padding: 20px 0; position: relative; }
-        .logo-text { font-size: 1.5em; font-weight: bold; letter-spacing: 6px; color: var(--accent); }
-        .quick-stats { position: absolute; right: 25px; font-family: 'Consolas', monospace; font-size: 0.85em; color: #777; line-height: 1.4; text-align: right; }
+        .header-top { display: flex; justify-content: center; align-items: center; padding: 25px 0; }
+        .logo-text { font-size: 1.6em; font-weight: bold; letter-spacing: 8px; color: var(--accent); }
 
-        /* ナビゲーション：使いやすさ重視 */
+        /* ナビゲーション */
         .tab-menu { display: flex; justify-content: center; background: #111; }
         .tab-btn { 
-            background: none; border: none; color: #666; padding: 18px 0; 
+            background: none; border: none; color: #666; padding: 20px 0; 
             cursor: pointer; font-weight: bold; font-size: 1.2em; transition: 0.3s;
             flex: 1; max-width: 300px; border-bottom: 4px solid transparent;
         }
@@ -30,36 +29,34 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .card { background: var(--card-bg); border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); margin-bottom: 20px; border: 1px solid #e1e4e8; }
-        h2 { margin: 0 0 20px 0; font-size: 1.1em; color: #555; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        h2 { margin: 0 0 20px 0; font-size: 1.2em; color: #333; font-weight: bold; border-left: 5px solid var(--accent); padding-left: 15px; }
 
-        /* 通貨・資産グリッド */
-        .audit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+        /* 資産グリッド */
+        .audit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
         .metric { background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #edf2f7; text-align: center; }
-        .metric-label { font-size: 0.75em; color: #718096; font-weight: bold; }
-        .metric-value { font-size: 1.4em; font-weight: bold; font-family: 'Consolas', monospace; color: #2d3748; }
+        .metric-label { font-size: 0.8em; color: #718096; font-weight: bold; }
+        .metric-value { font-size: 1.2em; font-weight: bold; font-family: 'Consolas', monospace; color: #2d3748; }
 
-        /* 入力エリア */
-        .input-box { margin-bottom: 15px; }
+        /* 操作系 */
+        .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .input-box { margin-bottom: 12px; }
         label { display: block; font-size: 0.85em; font-weight: bold; margin-bottom: 6px; color: #4a5568; }
-        input, select { width: 100%; padding: 14px; border: 1px solid #cbd5e0; border-radius: 10px; font-size: 1em; box-sizing: border-box; background: #fff; }
-        .action-btn { width: 100%; padding: 16px; border: none; border-radius: 10px; color: #fff; font-weight: bold; font-size: 1.1em; cursor: pointer; transition: 0.2s; }
-        .btn-mint { background: #ed8936; }
-        .btn-flow { background: var(--accent); }
+        input, select { width: 100%; padding: 14px; border: 1px solid #cbd5e0; border-radius: 10px; font-size: 1em; box-sizing: border-box; }
+        
+        .action-btn { width: 100%; padding: 18px; border: none; border-radius: 12px; color: #fff; font-weight: bold; font-size: 1.2em; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-blue { background: var(--accent); }
+        .btn-orange { background: #fd7e14; }
+        .btn-blue:hover, .btn-orange:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
-        /* AIタブ：チャットインターフェースの強化 */
-        .chat-container { display: flex; flex-direction: column; height: 70vh; }
-        #ai-log { flex-grow: 1; overflow-y: auto; background: #fdfdfd; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 15px; font-size: 1em; line-height: 1.6; }
-        .msg-row { margin-bottom: 15px; }
-        .msg-row.user { text-align: right; }
-        .msg-row.ai { text-align: left; }
-        .bubble { display: inline-block; padding: 12px 18px; border-radius: 18px; max-width: 80%; }
-        .user .bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
-        .ai .bubble { background: #edf2f7; color: #2d3748; border-bottom-left-radius: 4px; border: 1px solid #e2e8f0; }
+        /* AIチャット */
+        #ai-log { height: 60vh; overflow-y: auto; background: #fdfdfd; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 15px; }
+        .bubble { display: inline-block; padding: 12px 18px; border-radius: 18px; max-width: 80%; margin-bottom: 10px; }
+        .ai-bubble { background: #edf2f7; color: #2d3748; border-bottom-left-radius: 4px; }
+        .user-bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; float: right; clear: both; }
 
-        .ai-input-wrapper { display: flex; gap: 10px; background: #fff; padding: 10px; border-radius: 15px; border: 2px solid #e2e8f0; }
-        #ai-in { flex-grow: 1; border: none; padding: 10px; font-size: 1.1em; outline: none; }
-        .send-btn { background: var(--accent); color: #fff; border: none; width: 60px; height: 60px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .send-btn:hover { transform: scale(1.05); }
+        .ai-input-wrapper { display: flex; gap: 10px; }
+        #ai-in { flex-grow: 1; padding: 15px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 1.1em; }
+        .send-btn { background: var(--accent); color: #fff; border: none; width: 60px; border-radius: 12px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -67,10 +64,6 @@
     <header>
         <div class="header-top">
             <div class="logo-text">MSGAI SOVEREIGN</div>
-            <div class="quick-stats">
-                T: <span id="q_t">0.000000</span><br>
-                w: <span id="q_w">0.00</span>
-            </div>
         </div>
         <nav class="tab-menu">
             <button class="tab-btn active" onclick="openTab('currency')">通貨</button>
@@ -82,51 +75,60 @@
     <main id="viewport">
         <section id="currency" class="tab-pane active">
             <div class="card">
-                <h2>資産監査</h2>
+                <h2>口座</h2>
+                <div class="input-box" style="margin-bottom: 20px;">
+                    <label>ユーザー名</label>
+                    <input type="text" id="user_display" readonly style="background: #f1f3f5; font-weight: bold;">
+                </div>
                 <div id="bal_list" class="audit-grid"></div>
             </div>
+
             <div class="card">
-                <h2>循環・移動</h2>
-                <div class="audit-grid">
-                    <div class="input-box"><label>受取ユーザー</label><input type="text" id="rx_in" value="User_B"></div>
-                    <div class="input-box"><label>数量 (USD)</label><input type="number" id="amt_in" value="10.00"></div>
+                <h2>移動</h2>
+                <div class="control-grid">
+                    <div class="input-box"><label>移動先</label><input type="text" id="rx_in" value="User_B"></div>
+                    <div class="input-box">
+                        <label>対象通貨</label>
+                        <select id="tx_cur"></select>
+                    </div>
                 </div>
-                <button class="action-btn btn-flow" onclick="runTx()">循環実行</button>
+                <div class="input-box"><label>移動数量</label><input type="number" id="amt_in" value="10"></div>
+                <button class="action-btn btn-blue" onclick="runTx()">移動実行</button>
             </div>
+
             <div class="card">
-                <h2>通貨造化</h2>
-                <div class="audit-grid">
+                <h2>生成</h2>
+                <div class="control-grid">
+                    <div class="input-box"><label>移動先</label><input type="text" id="m_rx" value="User_A"></div>
                     <div class="input-box"><label>対象通貨</label><select id="m_cur"></select></div>
-                    <div class="input-box"><label>造化数量</label><input type="number" id="m_amt" value="100"></div>
                 </div>
-                <button class="action-btn btn-mint" onclick="runMint()">造化実行</button>
+                <div class="input-box"><label>生成数量</label><input type="number" id="m_amt" value="100"></div>
+                <button class="action-btn btn-orange" onclick="runMint()">生成実行</button>
             </div>
         </section>
 
         <section id="ai" class="tab-pane">
-            <div class="chat-container">
-                <div id="ai-log">
-                    <div class="msg-row ai"><div class="bubble">マスター、現在のTensionに基づいた作為の準備は整っています。</div></div>
+            <div class="card" style="height: 80vh; display: flex; flex-direction: column;">
+                <div id="ai-log" style="flex-grow:1;">
+                    <div class="bubble ai-bubble">AI準備完了</div>
                 </div>
                 <div class="ai-input-wrapper">
                     <input type="text" id="ai-in" placeholder="メッセージを入力...">
-                    <button class="send-btn" onclick="talk()">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                    </button>
+                    <button class="send-btn" onclick="talk()">送信</button>
                 </div>
             </div>
         </section>
 
         <section id="system" class="tab-pane">
             <div class="card">
-                <h2>根源監視</h2>
+                <h2>システムステータス</h2>
                 <div class="audit-grid">
                     <div class="metric"><span class="metric-label">Tension</span><span class="metric-value" id="t_val">0.000000</span></div>
                     <div class="metric"><span class="metric-label">Ratio (w)</span><span class="metric-value" id="w_val">0.00</span></div>
                 </div>
             </div>
             <div class="card">
-                <h2>基盤管理</h2>
+                <h2>システム管理</h2>
                 <button class="action-btn" style="background:#718096;" onclick="fullReset()">システム初期化</button>
             </div>
         </section>
@@ -134,8 +136,13 @@
 
     <script>
         const curs = ["USD", "JPY", "EUR", "BTC", "ETH", "MATIC"];
-        let state = JSON.parse(localStorage.getItem('msgai_v27')) || {
-            tension: 0.05, accounts: { User_A: { USD: 100, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 } }
+        let state = JSON.parse(localStorage.getItem('msgai_v28')) || {
+            user: 'User_A',
+            tension: 0.05, 
+            accounts: { 
+                User_A: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 },
+                User_B: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 }
+            }
         };
 
         window.openTab = (name) => {
@@ -146,24 +153,27 @@
         };
 
         function update() {
+            document.getElementById('user_display').value = state.user;
             const w = (1/(state.tension||0.000001)).toFixed(2);
-            document.getElementById('q_t').textContent = state.tension.toFixed(6);
-            document.getElementById('q_w').textContent = w;
             if(document.getElementById('t_val')) {
                 document.getElementById('t_val').textContent = state.tension.toFixed(6);
                 document.getElementById('w_val').textContent = w;
             }
             document.getElementById('bal_list').innerHTML = curs.map(c => 
-                `<div class="metric"><span class="metric-label">${c}</span><span class="metric-value" style="font-size:1.1em;">${(state.accounts.User_A[c]||0).toLocaleString()}</span></div>`
+                `<div class="metric"><span class="metric-label">${c}</span><span class="metric-value">${(state.accounts[state.user][c]||0).toLocaleString()}</span></div>`
             ).join('');
-            localStorage.setItem('msgai_v27', JSON.stringify(state));
+            localStorage.setItem('msgai_v28', JSON.stringify(state));
         }
 
         setInterval(update, 500);
 
         document.addEventListener('DOMContentLoaded', () => {
+            const txCur = document.getElementById('tx_cur');
             const mCur = document.getElementById('m_cur');
-            curs.forEach(c => mCur.add(new Option(c, c)));
+            curs.forEach(c => {
+                txCur.add(new Option(c, c));
+                mCur.add(new Option(c, c));
+            });
             update();
         });
 
@@ -171,14 +181,18 @@
             const i = document.getElementById('ai-in').value;
             if(!i) return;
             const log = document.getElementById('ai-log');
-            log.innerHTML += `<div class="msg-row user"><div class="bubble">${i}</div></div>`;
+            log.innerHTML += `<div class="user-bubble bubble">${i}</div>`;
             setTimeout(() => {
-                log.innerHTML += `<div class="msg-row ai"><div class="bubble">了解しました。全域の数理を調整します。</div></div>`;
+                log.innerHTML += `<div class="ai-bubble bubble" style="clear:both; display:block;">了解。</div>`;
                 log.scrollTop = log.scrollHeight;
             }, 500);
             document.getElementById('ai-in').value = '';
             log.scrollTop = log.scrollHeight;
         };
+
+        window.runTx = () => { /* 移動処理ロジック */ };
+        window.runMint = () => { /* 生成処理ロジック */ };
+        window.fullReset = () => { localStorage.clear(); location.reload(); };
     </script>
 </body>
 </html>
