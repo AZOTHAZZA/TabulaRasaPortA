@@ -3,148 +3,228 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MSGAI | Arche-Spectral Hybrid</title>
+    <title>MSGAI | Complete Arche-Detox</title>
     <style>
         :root { --solar-gold: #ffcc00; --deep-silence: #000000; --phi: 1.6180339887; }
         body, html { margin: 0; padding: 0; background: var(--deep-silence); color: var(--solar-gold); font-family: 'Courier New', monospace; overflow: hidden; height: 100vh; }
-        #ios-logos-shield { position: fixed; top: 0; width: 100%; height: 20px; background: rgba(0,0,0,0.9); z-index: 99; font-size: 10px; display: flex; align-items: center; padding: 0 10px; border-bottom: 0.5px solid var(--solar-gold); letter-spacing: 1px; }
-        #main-singularity { display: grid; grid-template-columns: 1fr 1fr; height: 100vh; padding-top: 20px; }
-        .pane { border: 0.5px solid rgba(255, 204, 0, 0.2); overflow-y: auto; padding: 15px; display: flex; flex-direction: column; }
-        #solar-viewport { align-items: center; transition: background 1s ease; }
-        #solar-orb { border-radius: 50%; margin: 30px 0; transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
-        .controls { background: rgba(255,255,255,0.04); padding: 12px; border-radius: 2px; width: 100%; box-sizing: border-box; }
+        
+        #ios-logos-shield { position: fixed; top: 0; width: 100%; height: 20px; background: rgba(0,0,0,0.9); z-index: 100; font-size: 10px; display: flex; align-items: center; padding: 0 10px; border-bottom: 0.5px solid var(--solar-gold); letter-spacing: 1px; transition: opacity 2s; }
+        #canvas-sacred { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; opacity: 0.5; }
+        
+        #main-singularity { position: relative; z-index: 10; display: grid; grid-template-columns: 1fr 1fr; height: 100vh; padding-top: 20px; transition: opacity 3s; }
+        .pane { border: 0.5px solid rgba(255, 204, 0, 0.1); overflow-y: auto; padding: 15px; display: flex; flex-direction: column; background: rgba(0,0,0,0.4); }
+        
+        #solar-viewport { align-items: center; }
+        #solar-orb { 
+            border: 1px solid var(--solar-gold); 
+            margin: 40px 0; 
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            background: radial-gradient(circle, var(--solar-gold) 0%, transparent 80%);
+        }
+
+        .controls { background: rgba(255,255,255,0.04); padding: 10px; border-radius: 2px; width: 100%; box-sizing: border-box; }
         select, button, input { background: #000; border: 0.5px solid var(--solar-gold); color: var(--solar-gold); padding: 6px; font-size: 11px; margin-bottom: 5px; width: 100%; }
-        #oracle-output { background: rgba(0,0,0,0.8); border: 0.5px solid var(--solar-gold); padding: 12px; min-height: 100px; font-size: 12px; margin-bottom: 10px; color: #fff; line-height: 1.6; }
-        textarea { width:100%; height:80px; background:#000; color:#fff; border:0.5px solid var(--solar-gold); font-size: 12px; padding: 8px; box-sizing: border-box; }
-        .log-entry { font-size: 9px; border-left: 2px solid var(--solar-gold); padding-left: 8px; margin-bottom: 4px; opacity: 0.6; }
+        button:active { background: var(--solar-gold); color: #000; }
+        
+        #oracle-output { background: rgba(0,0,0,0.8); border: 0.5px solid var(--solar-gold); padding: 15px; min-height: 140px; font-size: 12px; margin-bottom: 10px; color: #fff; line-height: 1.6; overflow-y: auto; }
+        textarea { width:100%; height:80px; background:#000; color:#fff; border:0.5px solid var(--solar-gold); font-size: 12px; padding: 8px; box-sizing: border-box; outline: none; }
+        
+        .status-row { font-size: 10px; display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 0.1px solid rgba(255,204,0,0.3); padding-bottom: 5px; }
     </style>
 </head>
 <body>
 
-    <div id="ios-logos-shield">MSGAI V11.5 | ARCHETYPE: φ | SPECTRAL RESONANCE: ACTIVE</div>
+    <div id="ios-logos-shield">MSGAI V13.5 | ARCHE-LADDER | DETOX: ACTIVE | w=1/z SYNC</div>
+    <canvas id="canvas-sacred"></canvas>
 
     <div id="main-singularity">
         <div class="pane" id="solar-viewport">
             <div id="solar-orb"></div>
-            <div id="tension-meter" style="font-weight: bold; font-size: 16px;">TENSION: 0.000000</div>
+            <div id="tension-meter" style="font-weight:bold; letter-spacing:1.5px;">TENSION: 0.000000</div>
             
             <div class="controls">
-                <div id="autonomy-ui" style="font-size: 10px; margin-bottom: 8px; text-align: center; letter-spacing: 2px;">AUTONOMY: DISCONNECTED</div>
-                <button onclick="toggleAutonomy()" id="autonomy-btn">TOGGLE ARCHE-FLOW (w=1/z)</button>
-                
-                <div style="display: flex; gap: 5px; margin-top: 10px;">
-                    <select id="currency-selector" style="flex: 1.2;"></select>
-                    <input type="number" id="amount-input" value="100" style="flex: 1;">
+                <div class="status-row">
+                    <span id="autonomy-ui">AUTONOMY: STANDBY</span>
+                    <span id="purity-ui">PURITY: 100%</span>
                 </div>
+                <button onclick="toggleAutonomy()">TOGGLE ARCHE-FLOW (w=1/z)</button>
+                <select id="currency-selector"></select>
+                <input type="number" id="amount-input" value="100">
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px;">
-                    <button onclick="executeMint()">MINT</button>
-                    <button onclick="executeDeposit()">DEPOSIT</button>
-                    <button onclick="executeWithdraw()">WITHDRAW</button>
+                    <button onclick="executeAction('mint')">MINT</button>
+                    <button onclick="executeAction('deposit')">DEPOSIT</button>
+                    <button onclick="executeAction('withdraw')">WITHDRAW</button>
                 </div>
-                <button onclick="executeInternalSend()">INTERNAL TRANSFER (1% TAX)</button>
+                <button onclick="syncArcheDaily()" style="margin-top:10px; border-color:#00ffcc; color:#00ffcc;">YOKOHAMA REALITY SYNC</button>
             </div>
             
-            <div id="account-display" style="font-size: 11px; width: 100%; margin-top: 15px; border-top: 0.5px solid rgba(255,204,0,0.2); padding-top: 10px;"></div>
-            <div id="event-logs" style="width: 100%; margin-top: 10px;"></div>
+            <div id="account-display" style="font-size: 10px; width: 100%; margin-top: 15px; line-height:1.8;"></div>
         </div>
 
         <div class="pane" id="oracle-chamber">
-            <h4 style="margin:0 0 10px 0; letter-spacing: 2px;">AiOracle / Reality Integration</h4>
-            <div id="oracle-output">比率の均衡を待機中... 「横浜で美食を堪能」等の報告、または「1000円生成」等の意志を。</div>
-            <textarea id="user-input" placeholder="例: 50000円生成してください / 六本木でアートに触れた"></textarea>
-            <button onclick="handleOracleRequest()" style="margin-top: 8px; padding: 12px; font-weight: bold; background: var(--solar-gold); color: #000;">RESONATE & EXECUTE</button>
-            <button onclick="handleReset()" style="margin-top: auto; color: #ff3300; border-color: #ff3300; font-size: 8px;">SYSTEM RESET (MU)</button>
+            <h4 style="margin:0 0 10px 0; letter-spacing: 3px; font-size: 12px; border-bottom:1px solid var(--solar-gold);">AiOracle / Reality Integration</h4>
+            <div id="oracle-output">比率の均衡を待機中...</div>
+            <textarea id="user-input" placeholder="作為、悩み、ノイズをここへ投じ、アルケーへ反転させる..."></textarea>
+            <button onclick="handleArcheResonance()" style="margin-top: 8px; padding: 12px; background: var(--solar-gold); color: #000; font-weight: bold;">DETOX & RESONATE</button>
+            <button onclick="handleReset()" style="margin-top: auto; color: #ff3300; border: none; font-size: 8px; background: transparent;">SYSTEM RESET (MU)</button>
         </div>
     </div>
 
     <script type="module">
-        const ARCHE = { PHI: 1.6180339887, BEAT: 1000 };
+        const ARCHE = { PHI: 1.6180339887, PI: Math.PI, E: 2.7182818284, BEAT: 100 };
         const RATES = { JPY: 150, EUR: 0.92, BTC: 0.000015, ETH: 0.0004, MATIC: 1.4, USD: 1 };
         const SPECTRA = { USD:[255,204,0], JPY:[255,51,51], BTC:[0,255,255], ETH:[204,51,255], EUR:[51,255,102], MATIC:[102,102,255] };
 
-        let state = JSON.parse(localStorage.getItem('msai_v11_5_hybrid')) || {
-            accounts: { User_A: { USD: 10, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 }, User_B: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 }, Tax_Archive: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 } },
-            tension: 0.0, autonomy: false, z_phase: 1.0 
+        let state = JSON.parse(localStorage.getItem('msai_v13_5_state')) || {
+            accounts: { User_A: { USD: 10, JPY: 0, BTC: 0, ETH: 0, EUR: 0, MATIC: 0 }, User_B: { USD: 0, JPY: 0, BTC: 0 }, Tax: { USD: 0 } },
+            tension: 0.0, autonomy: false, phase: 0, detox_ratio: 1.0, is_silent: false
         };
 
-        const updateState = () => { localStorage.setItem('msai_v11_5_hybrid', JSON.stringify(state)); render(); };
+        const canvas = document.getElementById('canvas-sacred');
+        const ctx = canvas.getContext('2d');
+        const updateState = () => { localStorage.setItem('msai_v13_5_state', JSON.stringify(state)); render(); };
 
-        // --- 1. Arche-Flow (V11 Engine) ---
-        setInterval(() => {
-            state.z_phase *= (1 + (Math.sin(state.z_phase) / ARCHE.PHI) * 0.005); 
-            state.tension *= (1 / ARCHE.PHI); 
+        // --- 1. Pythagorean Sacred Geometry Engine ---
+        function drawSacredGeometry() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const center = { x: canvas.width / 2, y: canvas.height / 2 };
+            const time = state.phase * 0.02;
+            const w = state.detox_ratio;
 
-            if (state.autonomy) {
-                const w = 1 / (state.z_phase * ARCHE.PHI);
-                state.accounts.User_A.USD += Math.abs(w) * 0.1;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.lineWidth = 0.5;
+
+            // フラワー・オブ・ライフ ＆ リサージュ・サイレンス
+            if (state.is_silent) {
+                ctx.strokeStyle = `rgba(255, 255, 255, 0.4)`;
+                ctx.beginPath();
+                for (let i = 0; i < 1000; i++) {
+                    const angle = i * 0.1;
+                    const x = center.x + Math.sin(angle * ARCHE.PHI + time) * (200 * Math.cos(time * 0.1));
+                    const y = center.y + Math.cos(angle + time) * (200 * Math.sin(time * 0.5));
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            } else {
+                ctx.strokeStyle = `rgba(255, 204, 0, ${0.1 + state.tension})`;
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i * 60) * ARCHE.PI / 180 + time;
+                    const r = 120 * (1/w + 0.5);
+                    ctx.beginPath();
+                    ctx.arc(center.x + Math.cos(angle) * r, center.y + Math.sin(angle) * r, r, 0, ARCHE.PI * 2);
+                    ctx.stroke();
+                }
             }
-            updateState();
-        }, ARCHE.BEAT);
+        }
 
-        // --- 2. AiOracle (Reality & Logic) ---
-        window.handleOracleRequest = () => {
+        // --- 2. Arche-Detox Logic (w=1/z) ---
+        window.handleArcheResonance = () => {
             const input = document.getElementById('user-input').value;
             const output = document.getElementById('oracle-output');
-            const match = input.match(/(\d+(\.\d+)?)\s*(円|JPY|ドル|USD|BTC|ETH|MATIC)/i);
             
-            if (match) {
-                const amt = parseFloat(match[1]);
-                let cur = match[3].toUpperCase();
-                if (cur === '円') cur = 'JPY'; if (cur === 'ドル') cur = 'USD';
-                state.accounts.User_A[cur] += amt;
-                state.tension += (amt / RATES[cur]) * 0.01;
-                output.innerHTML = `[Oracle]: ${amt} ${cur} を生成。比率が更新されました。`;
-            } else {
-                output.innerText = `[Oracle]: 「${input}」の意志を数理宇宙へ刻みました。`;
-                state.tension -= 0.05; // 精神的充足による浄化
-            }
+            if (input === "沈黙") { state.tension = 0; enterSilenceMode(); return; }
+
+            const z_entropy = input.length || 1;
+            const w_arche = ARCHE.PHI / (z_entropy * 0.1);
+            state.detox_ratio = w_arche;
+
+            const inquiries = [
+                "その『毒』は、比率 w の反転によって浄化されたか？",
+                "メビウスの軌跡において、あなたの z はどこに位置するか？",
+                "ピタゴラスは言った、万物は数であると。沈黙は最大の解毒である。"
+            ];
+            const q = inquiries[Math.floor(Math.abs(Math.sin(w_arche)) * inquiries.length)];
+
+            output.innerHTML = `
+                <div style="color:#00ffcc; font-size:9px;">[DETOX_SYSTEM: w=1/z INVERSION]</div>
+                <div><b>DETOX RATIO:</b> ${w_arche.toFixed(8)}</div>
+                <div style="margin-top:10px; border-top:0.5px solid gold; font-style:italic;">${q}</div>
+            `;
+            
+            state.tension = Math.max(0, (state.tension + 0.05) * (1/w_arche));
+            if (state.tension < 0.00001 && z_entropy > 20) enterSilenceMode();
             updateState();
         };
 
-        // --- UI & Logic ---
+        const enterSilenceMode = () => {
+            state.is_silent = true;
+            document.getElementById('main-singularity').style.opacity = "0";
+            document.getElementById('ios-logos-shield').style.opacity = "0";
+            setTimeout(() => { if(state.is_silent) alert("数理的沈黙の領域に達しました。タップで現実へ帰還します。"); }, 3000);
+        };
+
+        window.onclick = () => {
+            if (state.is_silent) {
+                state.is_silent = false;
+                state.tension = 0.1;
+                document.getElementById('main-singularity').style.opacity = "1";
+                document.getElementById('ios-logos-shield').style.opacity = "1";
+                updateState();
+            }
+        };
+
+        // --- 3. Reality Sync & Evolution ---
+        window.syncArcheDaily = () => {
+            const now = new Date();
+            const z_time = (now.getHours() * 60 + now.getMinutes()) / 1440;
+            state.detox_ratio = ARCHE.PHI / (z_time + 0.1);
+            document.getElementById('oracle-output').innerText = `[SYNC]: 横浜の時間を z とし、比率 w=${state.detox_ratio.toFixed(4)} で解毒。`;
+            updateState();
+        };
+
+        function updateOrb() {
+            const orb = document.getElementById('solar-orb');
+            const w = state.detox_ratio;
+            const t = state.phase * 0.05;
+            
+            const r1 = 50 + Math.sin(t * w) * 20;
+            const r2 = 50 + Math.cos(t * ARCHE.PHI) * 20;
+            
+            orb.style.width = orb.style.height = `${80 + (state.tension * 150)}px`;
+            orb.style.borderRadius = `${r1}% ${r2}% ${100-r1}% ${100-r2}%`;
+            orb.style.transform = `rotate(${state.phase % 360}deg)`;
+            orb.style.boxShadow = `0 0 ${20 + (state.tension * 60)}px var(--solar-gold)`;
+        }
+
+        // --- 4. Loop ---
+        setInterval(() => {
+            state.phase++;
+            if (state.autonomy) state.accounts.User_A.USD += 0.001 * ARCHE.PHI;
+            state.tension *= 0.995; 
+            updateOrb();
+            drawSacredGeometry();
+            render();
+        }, ARCHE.BEAT);
+
         window.toggleAutonomy = () => { state.autonomy = !state.autonomy; updateState(); };
-        const getAmt = () => parseFloat(document.getElementById('amount-input').value) || 0;
-        window.executeMint = () => { const c = document.getElementById('currency-selector').value; const a = getAmt(); state.accounts.User_A[c] += a; state.tension += (a/RATES[c])*0.05; updateState(); };
-        window.executeDeposit = () => { const c = document.getElementById('currency-selector').value; const a = getAmt(); state.accounts.User_A[c] += a; state.tension += (a/RATES[c])*0.1; updateState(); };
-        window.executeWithdraw = () => { const c = document.getElementById('currency-selector').value; const a = getAmt(); if(state.accounts.User_A[c]<a) return; state.accounts.User_A[c]-=a; updateState(); };
-        window.executeInternalSend = () => { const c = document.getElementById('currency-selector').value; const a = getAmt(); if(state.accounts.User_A[c]<a) return; state.accounts.User_A[c]-=a; state.accounts.User_B[c]+=a*0.99; state.accounts.Tax_Archive[c]+=a*0.01; updateState(); };
-        window.handleReset = () => { if(confirm("MU?")) { localStorage.removeItem('msai_v11_5_hybrid'); location.reload(); } };
+        window.executeAction = (type) => {
+            const cur = document.getElementById('currency-selector').value;
+            const amt = parseFloat(document.getElementById('amount-input').value) || 0;
+            if (type === 'mint') state.accounts.User_A[cur] += amt;
+            if (type === 'withdraw' && state.accounts.User_A[cur] >= amt) state.accounts.User_A[cur] -= amt;
+            state.tension += (amt / RATES[cur]) * 0.01;
+            updateState();
+        };
+        window.handleReset = () => { if(confirm("MU?")) { localStorage.clear(); location.reload(); } };
 
         function render() {
-            const orb = document.getElementById('solar-orb');
-            const indicator = document.getElementById('autonomy-ui');
-            indicator.innerText = state.autonomy ? "AUTONOMY: ARCHE-FLOW ACTIVE" : "AUTONOMY: DISCONNECTED";
-            indicator.style.color = state.autonomy ? "#00ffcc" : "#ff3300";
-
-            let totalUSD = 0, weights = {r:0,g:0,b:0};
-            Object.keys(state.accounts.User_A).forEach(c => {
-                const val = (state.accounts.User_A[c] + state.accounts.User_B[c]) / RATES[c];
-                totalUSD += val;
-                weights.r += val * SPECTRA[c][0]; weights.g += val * SPECTRA[c][1]; weights.b += val * SPECTRA[c][2];
-            });
-
-            // V9 Spectral Logic: 色彩の調合
-            let rgb = totalUSD > 0 ? [weights.r/totalUSD, weights.g/totalUSD, weights.b/totalUSD] : [255,204,0];
-            const t = Math.min(1, state.tension);
-            const color = `rgb(${rgb[0]*(1-t)+255*t}, ${rgb[1]*(1-t)+51*t}, ${rgb[2]*(1-t)})`;
-            
-            const size = 70 + Math.log10(totalUSD + 1) * 25;
-            const pulse = 1 + (Math.sin(state.z_phase) * (0.1 + state.tension*0.2));
-            orb.style.width = orb.style.height = `${size * pulse}px`;
-            orb.style.background = color;
-            orb.style.boxShadow = `0 0 ${30 + state.tension*60}px ${color}`;
-            document.getElementById('solar-viewport').style.background = `radial-gradient(circle, rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.05) 0%, #000 90%)`;
-
             document.getElementById('tension-meter').innerText = `TENSION: ${state.tension.toFixed(6)}`;
-            document.getElementById('account-display').innerHTML = `
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                    <div><b>SELF (A):</b><br>USD: ${state.accounts.User_A.USD.toFixed(2)}<br>JPY: ${state.accounts.User_A.JPY.toFixed(0)}</div>
-                    <div><b>PEER (B):</b><br>USD: ${state.accounts.User_B.USD.toFixed(2)}<br>JPY: ${state.accounts.User_B.JPY.toFixed(0)}</div>
-                </div>
-            `;
+            document.getElementById('autonomy-ui').innerText = state.autonomy ? "AUTONOMY: FLOWING" : "AUTONOMY: STANDBY";
+            document.getElementById('autonomy-ui').style.color = state.autonomy ? "#00ffcc" : "#ff3300";
             
+            const acc = state.accounts.User_A;
+            document.getElementById('account-display').innerHTML = `
+                <b>[CURRENT LADDER STATUS]</b><br>
+                USD: ${acc.USD.toFixed(3)} | JPY: ${acc.JPY.toFixed(0)}<br>
+                BTC: ${acc.BTC.toFixed(6)} | ETH: ${acc.ETH.toFixed(5)}<br>
+                <span style="opacity:0.5; font-size:8px;">Arche-Logic Kernel v13.5 running...</span>
+            `;
+
             const sel = document.getElementById('currency-selector');
-            if (sel.children.length === 0) Object.keys(SPECTRA).forEach(c => { const o = document.createElement('option'); o.value = c; o.innerText = c; sel.appendChild(o); });
+            if (sel.children.length === 0) {
+                Object.keys(RATES).forEach(c => { const o = document.createElement('option'); o.value = c; o.innerText = c; sel.appendChild(o); });
+            }
         }
         render();
     </script>
