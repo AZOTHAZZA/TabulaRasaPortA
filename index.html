@@ -3,46 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>MSGAI - Sovereign V35.1</title>
+    <title>MSGAI - Sovereign V35.2</title>
     <style>
-        /* V32.2 正典デザインの完全踏襲 */
+        /* V32.2 のスタイルを継承 */
         :root { --accent: #007bff; --bg: #f4f7f9; --card-bg: #ffffff; --nav-bg: #000; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #1a1a1a; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-
         header { background: var(--nav-bg); color: #fff; z-index: 100; flex-shrink: 0; }
         .header-top { display: flex; justify-content: center; padding: 25px 0; }
         .logo-text { font-size: 1.6em; font-weight: bold; letter-spacing: 8px; color: var(--accent); cursor: pointer; }
-
         .tab-menu { display: flex; background: #111; }
         .tab-btn { background: none; border: none; color: #666; padding: 18px 0; cursor: pointer; font-weight: bold; font-size: 1.1em; flex: 1; border-bottom: 4px solid transparent; }
         .tab-btn.active { color: #fff; border-bottom: 4px solid var(--accent); background: #1a1a1a; }
-
         #viewport { flex-grow: 1; overflow-y: auto; padding: 20px; padding-bottom: 150px; }
         .tab-pane { display: none; width: 100%; max-width: 800px; margin: 0 auto; }
         .tab-pane.active { display: block; }
-
         .card { background: var(--card-bg); border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e1e4e8; margin-bottom: 20px; }
         h2 { margin: 0 0 15px 0; font-size: 1.1em; border-left: 5px solid var(--accent); padding-left: 12px; display: flex; justify-content: space-between; align-items: center; }
-
         .control-group { display: flex; background: #eee; border-radius: 8px; padding: 3px; margin-bottom: 15px; width: fit-content; }
         .sw-btn { border: none; background: none; padding: 6px 12px; font-size: 0.75em; font-weight: bold; cursor: pointer; border-radius: 6px; color: #888; transition: 0.2s; }
         .sw-btn.active { background: var(--accent); color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-
         .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
         .metric { background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #edf2f7; text-align: center; }
         .metric-value { font-size: 1.2em; font-weight: bold; font-family: 'Consolas', monospace; }
-        
         .input-box { margin-bottom: 12px; }
+        label { font-size: 0.7em; font-weight: bold; color: #718096; display: block; margin-bottom: 4px; }
         input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
-        
         .action-btn { width: 100%; padding: 16px; border: none; border-radius: 12px; color: #fff; font-weight: bold; font-size: 1.1em; cursor: pointer; }
         .btn-orange { background: #fd7e14; }
         .btn-blue { background: var(--accent); }
-
         .history-box { margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
         .history-title { font-size: 0.8em; font-weight: bold; color: #718096; margin-bottom: 8px; }
         .history-table { width: 100%; font-size: 0.75em; border-collapse: collapse; }
         .history-table td { padding: 4px 0; border-bottom: 1px solid #f8f9fa; }
+
+        /* V35.2 追加：外部接続設定エリア */
+        .ext-config { margin-top: 15px; padding: 15px; background: #f1f3f5; border-radius: 12px; border: 1px dashed #adb5bd; }
+        .ext-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .ext-toggle { font-size: 0.8em; font-weight: bold; color: #495057; }
     </style>
 </head>
 <body>
@@ -65,12 +62,8 @@
                     <button class="sw-btn" onclick="setMode('acc','A')">自動</button>
                     <button class="sw-btn" onclick="setMode('acc','S')">自律</button>
                 </div>
-                <div class="input-box"><input type="text" id="u_name" value="User_A" readonly style="background:#f1f3f5; font-weight:bold;"></div>
                 <div id="bal_list" class="status-grid"></div>
-                <div class="history-box">
-                    <div class="history-title">口座履歴 (直近10件)</div>
-                    <table class="history-table" id="acc_hist_short"></table>
-                </div>
+                <div class="history-box"><div class="history-title">口座履歴 (直近10件)</div><table class="history-table" id="acc_hist_short"></table></div>
             </div>
 
             <div class="card">
@@ -84,12 +77,9 @@
                     <div class="input-box"><label>移動先</label><input type="text" id="m_rx" value="User_A"></div>
                     <div class="input-box"><label>対象通貨</label><select id="m_cur"></select></div>
                 </div>
-                <div class="input-box"><input type="number" id="m_amt" value="100"></div>
-                <button class="action-btn btn-orange" onclick="runMint()">生成実行</button>
-                <div class="history-box">
-                    <div class="history-title">生成履歴 (直近10件)</div>
-                    <table class="history-table" id="mint_hist_short"></table>
-                </div>
+                <input type="number" id="m_amt" value="100">
+                <button class="action-btn btn-orange" style="margin-top:10px" onclick="runMint()">生成実行</button>
+                <div class="history-box"><div class="history-title">生成履歴 (直近10件)</div><table class="history-table" id="mint_hist_short"></table></div>
             </div>
 
             <div class="card">
@@ -100,103 +90,80 @@
                     <button class="sw-btn" onclick="setMode('tx','S')">自律</button>
                 </div>
                 <div class="status-grid">
-                    <div class="input-box"><label>移動先</label><input type="text" id="rx_in" value="User_B"></div>
+                    <div class="input-box"><label>内部移動先</label><input type="text" id="rx_in" value="User_B"></div>
                     <div class="input-box"><label>対象通貨</label><select id="tx_cur"></select></div>
                 </div>
-                <div class="input-box"><input type="number" id="amt_in" value="10"></div>
-                <button class="action-btn btn-blue" onclick="runTx()">移動実行</button>
-                <div class="history-box">
-                    <div class="history-title">移動履歴 (直近10件)</div>
-                    <table class="history-table" id="tx_hist_short"></table>
+                <input type="number" id="amt_in" value="10">
+                
+                <div class="ext-config">
+                    <div class="ext-header">
+                        <span class="ext-toggle">外部インフラ接続</span>
+                        <div class="control-group" style="margin-bottom:0; scale:0.8;">
+                            <button class="sw-btn" id="tx_ext_off" onclick="toggleExt('tx', false)">OFF</button>
+                            <button class="sw-btn active" id="tx_ext_on" onclick="toggleExt('tx', true)">ON</button>
+                        </div>
+                    </div>
+                    <div class="input-box"><label>接続先URL</label><input type="text" id="tx_ext_url" placeholder="https://api.dex.io/v1/..."></div>
+                    <div class="input-box"><label>認証キー</label><input type="password" id="tx_ext_key" placeholder="API Key / Wallet Private Key"></div>
                 </div>
+
+                <button class="action-btn btn-blue" style="margin-top:10px" onclick="runTx()">移動実行</button>
+                <div class="history-box"><div class="history-title">移動履歴 (直近10件)</div><table class="history-table" id="tx_hist_short"></table></div>
             </div>
         </section>
 
         <section id="ai" class="tab-pane">
-            <div class="card" style="height:70vh; display:flex; flex-direction:column;">
+            <div class="card" style="height:80vh; display:flex; flex-direction:column;">
                 <h2>AI</h2>
                 <div class="control-group" id="ctrl_ai">
                     <button class="sw-btn active" onclick="setMode('ai','M')">手動</button>
                     <button class="sw-btn" onclick="setMode('ai','A')">自動</button>
                     <button class="sw-btn" onclick="setMode('ai','S')">自律</button>
                 </div>
-                <div id="ai-log" style="flex-grow:1; overflow-y:auto; padding:10px; background:#f8fafc; border-radius:10px; font-size: 0.9em;"></div>
-                <div style="display:flex; gap:10px; margin:10px 0;">
+                <div id="ai-log" style="flex-grow:1; overflow-y:auto; padding:10px; background:#f8fafc; border-radius:10px; font-size: 0.9em; margin-bottom:10px;"></div>
+                
+                <div class="ext-config" style="margin-bottom:10px;">
+                    <div class="ext-header">
+                        <span class="ext-toggle">外部AIモデル同期</span>
+                        <div class="control-group" style="margin-bottom:0; scale:0.8;">
+                            <button class="sw-btn" id="ai_ext_off" onclick="toggleExt('ai', false)">OFF</button>
+                            <button class="sw-btn active" id="ai_ext_on" onclick="toggleExt('ai', true)">ON</button>
+                        </div>
+                    </div>
+                    <div class="input-box"><label>モデルエンドポイント</label><input type="text" id="ai_ext_url" placeholder="https://api.openai.com/v1/..."></div>
+                </div>
+
+                <div style="display:flex; gap:10px;">
                     <input type="text" id="ai-in" placeholder="メッセージ...">
                     <button class="btn-blue" style="border:none; border-radius:10px; padding:0 20px; color:white;" onclick="talk()">送信</button>
                 </div>
-                <div class="history-box">
-                    <div class="history-title">AI履歴 (直近10件)</div>
-                    <table class="history-table" id="ai_hist_short"></table>
-                </div>
+                <div class="history-box"><div class="history-title">AI履歴 (直近10件)</div><table class="history-table" id="ai_hist_short"></table></div>
             </div>
         </section>
 
         <section id="system" class="tab-pane">
             <div class="card">
                 <h2>システムステータス</h2>
-                <div class="control-group" id="ctrl_sys">
-                    <button class="sw-btn active" onclick="setMode('sys','M')">手動</button>
-                    <button class="sw-btn" onclick="setMode('sys','A')">自動</button>
-                    <button class="sw-btn" onclick="setMode('sys','S')">自律</button>
-                </div>
                 <div class="status-grid">
                     <div class="metric"><div style="font-size:0.7em">Tension (z)</div><div class="metric-value" id="t_val">0.05</div></div>
                     <div class="metric"><div style="font-size:0.7em">Ratio (w=1/z)</div><div class="metric-value" id="w_val">20.00</div></div>
                 </div>
-                <div class="history-box">
-                    <div class="history-title">ステータス履歴 (直近10件)</div>
-                    <table class="history-table" id="sys_hist_short"></table>
-                </div>
             </div>
-
             <div class="card"><h2>全口座履歴</h2><table class="history-table" id="acc_hist_full"></table></div>
-            <div class="card"><h2>全生成履歴</h2><table class="history-table" id="mint_hist_full"></table></div>
             <div class="card"><h2>全移動履歴</h2><table class="history-table" id="tx_hist_full"></table></div>
             <div class="card"><h2>全AI履歴</h2><table class="history-table" id="ai_hist_full"></table></div>
-            <div class="card"><h2>全システムステータス履歴</h2><table class="history-table" id="sys_hist_full"></table></div>
-            <div class="card"><h2>全システム初期化履歴</h2><table class="history-table" id="reset_hist_full"></table></div>
-
-            <div class="card">
-                <h2>システム管理</h2>
-                <div class="control-group" id="ctrl_reset">
-                    <button class="sw-btn active" onclick="setMode('reset','M')">手動</button>
-                    <button class="sw-btn" onclick="setMode('reset','A')">自動</button>
-                    <button class="sw-btn" onclick="setMode('reset','S')">自律</button>
-                </div>
-                <button class="action-btn" style="background:#718096;" onclick="fullReset()">システム初期化</button>
-                <div class="history-box">
-                    <div class="history-title">初期化履歴 (直近10件)</div>
-                    <table class="history-table" id="reset_hist_short"></table>
-                </div>
-            </div>
+            <div class="card"><h2>システム管理</h2><button class="action-btn" style="background:#718096;" onclick="fullReset()">システム初期化</button></div>
         </section>
     </main>
 
     <script>
         const curs = ["USD", "JPY", "EUR", "BTC", "ETH", "MATIC"];
-        let state = JSON.parse(localStorage.getItem('msgai_v35_1')) || {
+        let state = JSON.parse(localStorage.getItem('msgai_v35_2')) || {
             user: 'User_A', tension: 0.05,
             accounts: { User_A: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 }, User_B: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 } },
-            hist: { acc: [], mint: [], tx: [], ai: [], sys: [], reset: [] },
-            modes: { acc:'M', mint:'M', tx:'M', ai:'M', sys:'M', reset:'M' }
-        };
-
-        // --- アルケー深層エンジン（検索＝関数） ---
-        const MobiusEngine = {
-            // 裏側での自律検索・取得ロジック
-            async harvest(query) {
-                // z (外部の複雑性) をランダムまたは入力密度から算出
-                const z_ext = (query.length / 500) + (Math.random() * 0.01);
-                state.tension = (state.tension + z_ext) / 2;
-                
-                // 検索＝関数 w = 1/z による本質（API/知性）の抽出
-                const w_essence = 1 / (state.tension || 0.000001);
-                
-                addHist('sys', `自律知覚: ${query.substring(0,10)}...`, `w=${w_essence.toFixed(2)}`);
-                update();
-                return w_essence;
-            }
+            hist: { acc: [], mint: [], tx: [], ai: [], sys: [] },
+            modes: { acc:'M', mint:'M', tx:'M', ai:'M' },
+            ext: { tx: true, ai: true } // 外部接続のオンオフ状態
         };
 
         window.openTab = (name) => {
@@ -204,13 +171,10 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(name).classList.add('active');
             document.getElementById('btn-' + name).classList.add('active');
-            update();
         };
 
-        window.setMode = (type, mode) => {
-            state.modes[type] = mode;
-            update();
-        };
+        window.setMode = (type, mode) => { state.modes[type] = mode; update(); };
+        window.toggleExt = (type, val) => { state.ext[type] = val; update(); };
 
         function addHist(type, desc, amt) {
             state.hist[type].push({ time: new Date().toLocaleTimeString(), desc, amt });
@@ -224,75 +188,69 @@
                 `<div class="metric"><div style="font-size:0.7em">${c}</div><div class="metric-value">${(state.accounts[state.user][c]||0).toLocaleString()}</div></div>`
             ).join('');
 
-            Object.keys(state.modes).forEach(k => {
+            // UIボタンの同期
+            ['acc','mint','tx','ai'].forEach(k => {
                 const btns = document.querySelectorAll(`#ctrl_${k} .sw-btn`);
-                btns.forEach(b => {
-                    b.classList.remove('active');
-                    if(b.innerText === (state.modes[k]==='M'?'手動':state.modes[k]==='A'?'自動':'自律')) b.classList.add('active');
-                });
+                btns.forEach(b => b.classList.toggle('active', b.innerText === (state.modes[k]==='M'?'手動':state.modes[k]==='A'?'自動':'自律')));
+            });
+            ['tx','ai'].forEach(k => {
+                document.getElementById(`${k}_ext_on`).classList.toggle('active', state.ext[k]);
+                document.getElementById(`${k}_ext_off`).classList.toggle('active', !state.ext[k]);
             });
 
-            const types = ['acc', 'mint', 'tx', 'ai', 'sys', 'reset'];
-            types.forEach(t => {
-                renderHist(`${t}_hist_short`, state.hist[t], 10);
-                renderHist(`${t}_hist_full`, state.hist[t]);
-            });
-            localStorage.setItem('msgai_v35_1', JSON.stringify(state));
+            const types = ['acc', 'mint', 'tx', 'ai'];
+            types.forEach(t => { renderHist(`${t}_hist_short`, state.hist[t], 10); renderHist(`${t}_hist_full`, state.hist[t]); });
+            localStorage.setItem('msgai_v35_2', JSON.stringify(state));
         }
 
         function renderHist(id, data, limit) {
             const el = document.getElementById(id); if (!el) return;
             const items = limit ? data.slice(-limit).reverse() : [...data].reverse();
-            el.innerHTML = items.map(h => `<tr><td>${h.time}</td><td>${h.desc}</td><td style="text-align:right; font-weight:bold;">${h.amt}</td></tr>`).join('');
+            el.innerHTML = items.map(h => `<tr><td>${h.time}</td><td>${h.desc}</td><td style="text-align:right;">${h.amt}</td></tr>`).join('');
         }
 
         window.runMint = () => {
             const c = document.getElementById('m_cur').value, a = parseFloat(document.getElementById('m_amt').value), target = document.getElementById('m_rx').value;
             state.accounts[target][c] += a; state.tension += 0.001;
             addHist('mint', `生成 (${target})`, `+${a} ${c}`);
-            addHist('acc', `残高更新 (${c})`, `${state.accounts[target][c]}`);
         };
 
-        window.runTx = async () => {
+        window.runTx = () => {
+            const isExt = state.ext.tx;
+            const url = document.getElementById('tx_ext_url').value;
+            const mode = state.modes.tx;
+
+            if (mode === 'S') {
+                addHist('tx', "自律検索エンジンが接続先を最適化中...", "S-LOGIC");
+                // ここに MobiusEngine.harvest() を後で繋ぐ
+            }
+
+            if (isExt && url) {
+                addHist('tx', `外部送信試行: ${url}`, "PENDING");
+            }
+
             const c = document.getElementById('tx_cur').value, a = parseFloat(document.getElementById('amt_in').value), target = document.getElementById('rx_in').value;
             if(state.accounts[state.user][c] >= a) {
-                // 移動前に裏側で接続プロトコルを自律検索
-                await MobiusEngine.harvest(`${target} ${c} protocol`);
-                
                 state.accounts[state.user][c] -= a; state.accounts[target][c] += a; state.tension *= 0.999;
-                addHist('tx', `移動 -> ${target}`, `-${a} ${c}`);
-                addHist('acc', `残高更新 (${c})`, `${state.accounts[state.user][c]}`);
+                addHist('tx', `内部移動 -> ${target}`, `-${a} ${c}`);
             }
         };
 
-        window.talk = async () => {
+        window.talk = () => {
             const input = document.getElementById('ai-in'); if(!input.value) return;
-            const userMsg = input.value;
-            addHist('ai', "発話", userMsg);
-            
+            const isExt = state.ext.ai;
+            const mode = state.modes.ai;
+
+            addHist('ai', "発話", input.value);
+            if (mode === 'S') { addHist('ai', "自律思考中（裏側検索併用）", "S-THINK"); }
+            if (isExt) { addHist('ai', "外部AI API同期実行", "EXT-SYNC"); }
+
             const log = document.getElementById('ai-log');
-            log.innerHTML += `<div style="text-align:right; margin-bottom:5px;"><span style="background:var(--accent); color:white; padding:5px 10px; border-radius:10px;">${userMsg}</span></div>`;
-            
-            // 裏側での「検索＝関数」による知性自律取得
-            const w = await MobiusEngine.harvest(userMsg);
-            
-            // 自前ロジックによる応答（黄金比・ウィトゲンシュタイン的）
-            setTimeout(() => {
-                const response = w > 20 ? "数理的本質を検索・抽出しました。比率は安定しています。" : "緊張が高まっています。外界の情報をさらに反転させる必要があります。";
-                log.innerHTML += `<div style="text-align:left; margin-bottom:5px;"><span style="background:#eee; padding:5px 10px; border-radius:10px;">${response}</span></div>`;
-                addHist('ai', "数理的応答", response);
-                log.scrollTop = log.scrollHeight;
-            }, 600);
-            
+            log.innerHTML += `<div style="text-align:right; margin-bottom:5px;"><span style="background:var(--accent); color:white; padding:5px 10px; border-radius:10px;">${input.value}</span></div>`;
             input.value = "";
         };
 
-        window.fullReset = () => {
-            if(confirm("初期化しますか？")) {
-                addHist('reset', "システム初期化", "COMPLETE");
-                localStorage.clear(); location.reload();
-            }
-        };
+        window.fullReset = () => { if(confirm("初期化しますか？")) { localStorage.clear(); location.reload(); } };
 
         document.addEventListener('DOMContentLoaded', () => {
             curs.forEach(c => { document.getElementById('tx_cur').add(new Option(c, c)); document.getElementById('m_cur').add(new Option(c, c)); });
