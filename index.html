@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>MSGAI - Sovereign V34.0</title>
+    <title>MSGAI - Sovereign V34.1</title>
     <style>
-        /* --- V32.2 スタイルを完全踏襲 --- */
+        /* --- V32.2 スタイルを完全継承 --- */
         :root { --accent: #007bff; --bg: #f4f7f9; --card-bg: #ffffff; --nav-bg: #000; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #1a1a1a; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         header { background: var(--nav-bg); color: #fff; z-index: 100; flex-shrink: 0; }
@@ -27,8 +27,8 @@
         .metric-value { font-size: 1.2em; font-weight: bold; font-family: 'Consolas', monospace; }
         .input-box { margin-bottom: 12px; }
         label { font-size: 0.7em; font-weight: bold; color: #718096; display: block; margin-bottom: 4px; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
-        .action-btn { width: 100%; padding: 16px; border: none; border-radius: 12px; color: #fff; font-weight: bold; font-size: 1.1em; cursor: pointer; margin-bottom: 10px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        .action-btn { width: 100%; padding: 16px; border: none; border-radius: 12px; color: #fff; font-weight: bold; font-size: 1.1em; cursor: pointer; }
         .btn-orange { background: #fd7e14; }
         .btn-blue { background: var(--accent); }
         .history-box { margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
@@ -36,10 +36,9 @@
         .history-table { width: 100%; font-size: 0.75em; border-collapse: collapse; }
         .history-table td { padding: 4px 0; border-bottom: 1px solid #f8f9fa; }
 
-        /* --- V34 追加：外部設定用スタイル（カード内の馴染みを重視） --- */
+        /* 外部同期セクション用（デザインを崩さない点線枠） */
         .ext-area { background: #f8f9fa; border-radius: 12px; padding: 15px; border: 1px dashed #cbd5e0; margin-top: 15px; }
         .sw-toggle { font-size: 0.7em; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-        .adv-text { font-size: 0.7em; color: var(--accent); cursor: pointer; text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -64,6 +63,23 @@
                 </div>
                 <div class="input-box"><input type="text" id="u_name" value="User_A" readonly style="background:#f1f3f5; font-weight:bold;"></div>
                 <div id="bal_list" class="status-grid"></div>
+                <div class="history-box"><div class="history-title">口座履歴</div><table class="history-table" id="acc_hist_short"></table></div>
+            </div>
+
+            <div class="card">
+                <h2>生成</h2>
+                <div class="control-group" id="ctrl_mint">
+                    <button class="sw-btn active" onclick="setMode('mint','M')">手動</button>
+                    <button class="sw-btn" onclick="setMode('mint','A')">自動</button>
+                    <button class="sw-btn" onclick="setMode('mint','S')">自律</button>
+                </div>
+                <div class="status-grid">
+                    <div class="input-box"><label>移動先</label><input type="text" id="m_rx" value="User_A"></div>
+                    <div class="input-box"><label>対象通貨</label><select id="m_cur"></select></div>
+                </div>
+                <div class="input-box"><input type="number" id="m_amt" value="100"></div>
+                <button class="action-btn btn-orange" onclick="runMint()">生成実行</button>
+                <div class="history-box"><div class="history-title">生成履歴</div><table class="history-table" id="mint_hist_short"></table></div>
             </div>
 
             <div class="card">
@@ -81,106 +97,133 @@
                 <button class="action-btn btn-blue" onclick="runTx()">移動実行</button>
 
                 <div class="ext-area">
-                    <div class="sw-toggle">
-                        <span>外部API移動擬態同期</span>
-                        <div class="control-group" style="margin-bottom:0; scale:0.8;">
-                            <button class="sw-btn" id="tx_sync_off" onclick="toggleSync('tx', false)">オフ</button>
-                            <button class="sw-btn active" id="tx_sync_on" onclick="toggleSync('tx', true)">オン</button>
-                        </div>
-                    </div>
-                    <div id="tx_ext_fields">
-                        <div class="input-box"><label>同期先URL</label><input type="text" id="tx_url" placeholder="https://api..."></div>
-                        <div class="input-box"><label>APIキー</label><input type="password" id="tx_key" placeholder="認証鍵"></div>
-                        <div class="input-box"><label>擬態宛先</label><input type="text" id="tx_ext_target" placeholder="0x... / ID"></div>
-                        <span class="adv-text" onclick="toggleAdv('tx_adv')">詳細設定（プロトコル等）</span>
-                        <div id="tx_adv" style="display:none; margin-top:10px;">
-                            <div class="input-box"><label>ネットワークID</label><input type="number" id="tx_chain" placeholder="1"></div>
-                            <div class="input-box"><label>契約住所</label><input type="text" id="tx_contract" placeholder="0x..."></div>
-                        </div>
-                        <button class="action-btn btn-blue" style="background:#28a745; margin-top:10px;" onclick="runExternalTxSync()">外部API移動擬態同期</button>
-                    </div>
+                    <div class="sw-toggle"><span>外部API移動擬態同期</span><div class="control-group" style="margin-bottom:0; scale:0.8;"><button class="sw-btn" id="tx_sync_off" onclick="toggleSync('tx',false)">オフ</button><button class="sw-btn active" id="tx_sync_on" onclick="toggleSync('tx',true)">オン</button></div></div>
+                    <div class="input-box"><label>同期先URL</label><input type="text" id="tx_url" placeholder="https://api..."></div>
+                    <div class="input-box"><label>APIキー</label><input type="password" id="tx_key" placeholder="認証鍵"></div>
                 </div>
 
-                <div class="history-box">
-                    <div class="history-title">移動履歴</div>
-                    <table class="history-table" id="tx_hist_short"></table>
-                </div>
+                <div class="history-box"><div class="history-title">移動履歴</div><table class="history-table" id="tx_hist_short"></table></div>
             </div>
         </section>
 
         <section id="ai" class="tab-pane">
-            <div class="card" style="height:auto; display:flex; flex-direction:column;">
+            <div class="card" style="height:70vh; display:flex; flex-direction:column;">
                 <h2>AI</h2>
-                <div id="ai-log" style="height:200px; overflow-y:auto; padding:10px; background:#f8fafc; border-radius:10px; font-size: 0.9em; margin-bottom:10px;"></div>
-                <div style="display:flex; gap:10px; margin-bottom:15px;">
-                    <input type="text" id="ai-in" placeholder="メッセージ...">
-                    <button class="btn-blue" style="border:none; border-radius:10px; padding:0 20px; color:white;" onclick="talk()">送信</button>
+                <div class="control-group" id="ctrl_ai">
+                    <button class="sw-btn active" onclick="setMode('ai','M')">手動</button>
+                    <button class="sw-btn" onclick="setMode('ai','A')">自動</button>
+                    <button class="sw-btn" onclick="setMode('ai','S')">自律</button>
                 </div>
-
+                <div id="ai-log" style="flex-grow:1; overflow-y:auto; padding:10px; background:#f8fafc; border-radius:10px; font-size: 0.9em; margin-bottom:10px;"></div>
+                <div style="display:flex; gap:10px;"><input type="text" id="ai-in" placeholder="メッセージ..."><button class="btn-blue" style="border:none; border-radius:10px; padding:0 20px; color:white;" onclick="talk()">送信</button></div>
+                
                 <div class="ext-area">
-                    <div class="sw-toggle">
-                        <span>外部AIモデル擬態同期</span>
-                        <div class="control-group" style="margin-bottom:0; scale:0.8;">
-                            <button class="sw-btn" id="ai_sync_off" onclick="toggleSync('ai', false)">オフ</button>
-                            <button class="sw-btn active" id="ai_sync_on" onclick="toggleSync('ai', true)">オン</button>
-                        </div>
-                    </div>
+                    <div class="sw-toggle"><span>外部AIモデル擬態同期</span><div class="control-group" style="margin-bottom:0; scale:0.8;"><button class="sw-btn" id="ai_sync_off" onclick="toggleSync('ai',false)">オフ</button><button class="sw-btn active" id="ai_sync_on" onclick="toggleSync('ai',true)">オン</button></div></div>
                     <div class="input-box"><label>モデルURL</label><input type="text" id="ai_url" placeholder="https://api..."></div>
-                    <div class="input-box"><label>APIキー</label><input type="password" id="ai_key" placeholder="認証鍵"></div>
-                    <button class="action-btn btn-blue" style="background:#28a745;" onclick="runExternalAiSync()">外部AIモデル擬態同期</button>
                 </div>
+                <div class="history-box"><div class="history-title">AI履歴</div><table class="history-table" id="ai_hist_short"></table></div>
             </div>
         </section>
 
         <section id="system" class="tab-pane">
-            </section>
+            <div class="card">
+                <h2>システムステータス</h2>
+                <div class="status-grid">
+                    <div class="metric"><div style="font-size:0.7em">Tension (z)</div><div class="metric-value" id="t_val">0.05</div></div>
+                    <div class="metric"><div style="font-size:0.7em">Ratio (w=1/z)</div><div class="metric-value" id="w_val">20.00</div></div>
+                </div>
+            </div>
+            <div class="card"><h2>全履歴表示</h2><div class="history-box"><table class="history-table" id="acc_hist_full"></table></div></div>
+            <div class="card"><h2>システム管理</h2><button class="action-btn" style="background:#718096;" onclick="fullReset()">システム初期化</button></div>
+        </section>
     </main>
 
     <script>
-        // --- V32.2 のステートを完全踏襲 ---
-        let state = JSON.parse(localStorage.getItem('msgai_v34')) || {
+        const curs = ["USD", "JPY", "EUR", "BTC", "ETH", "MATIC"];
+        let state = JSON.parse(localStorage.getItem('msgai_v34_1')) || {
             user: 'User_A', tension: 0.05,
             accounts: { User_A: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 }, User_B: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 } },
             hist: { acc: [], mint: [], tx: [], ai: [], sys: [], reset: [] },
-            modes: { acc:'M', mint:'M', tx:'M', ai:'M', sys:'M', reset:'M' },
-            sync: { tx: true, ai: true } // V34追加分
+            modes: { acc:'M', mint:'M', tx:'M', ai:'M', sys:'M' },
+            sync: { tx: true, ai: true }
         };
 
-        // 基本機能（openTab, setMode, addHist, update, renderHist, runMint, runTx, talk, fullReset）は
-        // マスターから提示されたコードを100%継承。
+        window.openTab = (name) => {
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(name).classList.add('active');
+            document.getElementById('btn-' + name).classList.add('active');
+        };
 
-        // --- V34 追加：同期制御ロジック ---
-        window.toggleSync = (type, val) => {
-            state.sync[type] = val;
-            document.getElementById(`${type}_sync_on`).classList.toggle('active', val);
-            document.getElementById(`${type}_sync_off`).classList.toggle('active', !val);
+        window.setMode = (type, mode) => { state.modes[type] = mode; update(); };
+        window.toggleSync = (type, val) => { state.sync[type] = val; update(); };
+
+        function addHist(type, desc, amt) {
+            state.hist[type].push({ time: new Date().toLocaleTimeString(), desc, amt });
             update();
+        }
+
+        function update() {
+            document.getElementById('t_val').textContent = state.tension.toFixed(6);
+            document.getElementById('w_val').textContent = (1/(state.tension||0.000001)).toFixed(2);
+            document.getElementById('bal_list').innerHTML = curs.map(c => 
+                `<div class="metric"><div style="font-size:0.7em">${c}</div><div class="metric-value">${(state.accounts[state.user][c]||0).toLocaleString()}</div></div>`
+            ).join('');
+
+            // モード/同期ボタン反映
+            ['acc','mint','tx','ai'].forEach(k => {
+                const btns = document.querySelectorAll(`#ctrl_${k} .sw-btn`);
+                btns.forEach(b => b.classList.toggle('active', b.innerText === (state.modes[k]==='M'?'手動':state.modes[k]==='A'?'自動':'自律')));
+            });
+            ['tx','ai'].forEach(type => {
+                document.getElementById(`${type}_sync_on`).classList.toggle('active', state.sync[type]);
+                document.getElementById(`${type}_sync_off`).classList.toggle('active', !state.sync[type]);
+            });
+
+            renderHist('acc_hist_short', state.hist.acc, 10);
+            renderHist('mint_hist_short', state.hist.mint, 10);
+            renderHist('tx_hist_short', state.hist.tx, 10);
+            renderHist('ai_hist_short', state.hist.ai, 10);
+            renderHist('acc_hist_full', state.hist.acc);
+            
+            localStorage.setItem('msgai_v34_1', JSON.stringify(state));
+        }
+
+        function renderHist(id, data, limit) {
+            const el = document.getElementById(id); if (!el) return;
+            const items = limit ? data.slice(-limit).reverse() : [...data].reverse();
+            el.innerHTML = items.map(h => `<tr><td>${h.time}</td><td>${h.desc}</td><td style="text-align:right;">${h.amt}</td></tr>`).join('');
+        }
+
+        window.runMint = () => {
+            const c = document.getElementById('m_cur').value, a = parseFloat(document.getElementById('m_amt').value), target = document.getElementById('m_rx').value;
+            state.accounts[target][c] += a; state.tension += 0.001;
+            addHist('mint', `生成 (${target})`, `+${a} ${c}`);
+            addHist('acc', `残高更新 (${c})`, `${state.accounts[target][c]}`);
         };
 
-        window.toggleAdv = (id) => {
-            const el = document.getElementById(id);
-            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        window.runTx = () => {
+            const c = document.getElementById('tx_cur').value, a = parseFloat(document.getElementById('amt_in').value), target = document.getElementById('rx_in').value;
+            if(state.accounts[state.user][c] >= a) {
+                state.accounts[state.user][c] -= a; state.accounts[target][c] += a; state.tension *= 0.999;
+                addHist('tx', `移動 -> ${target}`, `-${a} ${c}`);
+                addHist('acc', `残高更新 (${c})`, `${state.accounts[state.user][c]}`);
+            }
         };
 
-        // メビウス反動射出（これまでの議論をこの関数に封入）
-        window.runExternalTxSync = async () => {
-            if(!state.sync.tx) return;
-            const power = (1 / (state.tension || 0.000001)) * 1.6180339887;
-            addHist('sys', '外部API移動擬態開始', `Power: ${power.toFixed(2)}`);
-            // ここに以前構築した fetch(LiveConnect) 処理が走る
+        window.talk = () => {
+            const input = document.getElementById('ai-in'); if(!input.value) return;
+            addHist('ai', "発話", input.value);
+            document.getElementById('ai-log').innerHTML += `<div style="text-align:right; margin-bottom:5px;"><span style="background:var(--accent); color:white; padding:5px 10px; border-radius:10px;">${input.value}</span></div>`;
+            input.value = "";
         };
 
-        window.runExternalAiSync = async () => {
-            if(!state.sync.ai) return;
-            addHist('ai', '外部モデル擬態通信', 'Arche-Sync');
-        };
+        window.fullReset = () => { if(confirm("初期化しますか？")) { localStorage.clear(); location.reload(); } };
 
-        // 初期化処理
         document.addEventListener('DOMContentLoaded', () => {
-            const curs = ["USD", "JPY", "EUR", "BTC", "ETH", "MATIC"];
             curs.forEach(c => { 
                 document.getElementById('tx_cur').add(new Option(c, c)); 
-                if(document.getElementById('m_cur')) document.getElementById('m_cur').add(new Option(c, c)); 
+                document.getElementById('m_cur').add(new Option(c, c)); 
             });
             update();
         });
