@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>MSGAI - Sovereign V35.4</title>
+    <title>MSGAI - Sovereign V35.5</title>
     <style>
-        /* V32.2正典デザインを完全維持 */
+        /* V32.2 正典デザイン・アニメーションを完全継承 */
         :root { --accent: #007bff; --bg: #f4f7f9; --card-bg: #ffffff; --nav-bg: #000; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #1a1a1a; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         header { background: var(--nav-bg); color: #fff; z-index: 100; flex-shrink: 0; }
@@ -36,7 +36,7 @@
         .history-table { width: 100%; font-size: 0.75em; border-collapse: collapse; }
         .history-table td { padding: 4px 0; border-bottom: 1px solid #f8f9fa; }
 
-        /* V35.x 外部設定エリア */
+        /* 追加機能：外部接続設定エリア */
         .ext-config { margin-top: 15px; padding: 15px; background: #f1f3f5; border-radius: 12px; border: 1px dashed #adb5bd; }
         .ext-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
         .ext-label { font-size: 0.8em; font-weight: bold; color: #495057; }
@@ -98,11 +98,17 @@
                 <div class="ext-config">
                     <div class="ext-header">
                         <span class="ext-label">外部接続 [ON/OFF]</span>
-                        <div class="control-group" style="margin-bottom:0; scale:0.8;"><button class="sw-btn" id="tx_ext_off" onclick="toggleExt('tx', false)">OFF</button><button class="sw-btn" id="tx_ext_on" onclick="toggleExt('tx', true)">ON</button></div>
+                        <div class="control-group" style="margin-bottom:0; scale:0.8;">
+                            <button class="sw-btn" id="tx_ext_off" onclick="toggleExt('tx', false)">OFF</button>
+                            <button class="sw-btn" id="tx_ext_on" onclick="toggleExt('tx', true)">ON</button>
+                        </div>
                         <span class="ext-label">自律検索 [S-Search]</span>
-                        <div class="control-group" style="margin-bottom:0; scale:0.8;"><button class="sw-btn" id="tx_search_off" onclick="toggleSearch('tx', false)">OFF</button><button class="sw-btn" id="tx_search_on" onclick="toggleSearch('tx', true)">ON</button></div>
+                        <div class="control-group" style="margin-bottom:0; scale:0.8;">
+                            <button class="sw-btn" id="tx_search_off" onclick="toggleSearch('tx', false)">OFF</button>
+                            <button class="sw-btn" id="tx_search_on" onclick="toggleSearch('tx', true)">ON</button>
+                        </div>
                     </div>
-                    <div class="input-box"><label>接続先URL (自律時は自動入力)</label><input type="text" id="tx_ext_url"></div>
+                    <div class="input-box"><label>接続先URL</label><input type="text" id="tx_ext_url" placeholder="https://..."></div>
                 </div>
 
                 <button class="action-btn btn-blue" style="margin-top:10px" onclick="runTx()">移動実行</button>
@@ -123,11 +129,17 @@
                 <div class="ext-config" style="margin-bottom:10px;">
                     <div class="ext-header">
                         <span class="ext-label">外部同期 [ON/OFF]</span>
-                        <div class="control-group" style="margin-bottom:0; scale:0.8;"><button class="sw-btn" id="ai_ext_off" onclick="toggleExt('ai', false)">OFF</button><button class="sw-btn" id="ai_ext_on" onclick="toggleExt('ai', true)">ON</button></div>
-                        <span class="ext-label">モデル自律取得 [S-Search]</span>
-                        <div class="control-group" style="margin-bottom:0; scale:0.8;"><button class="sw-btn" id="ai_search_off" onclick="toggleSearch('ai', false)">OFF</button><button class="sw-btn" id="ai_search_on" onclick="toggleSearch('ai', true)">ON</button></div>
+                        <div class="control-group" style="margin-bottom:0; scale:0.8;">
+                            <button class="sw-btn" id="ai_ext_off" onclick="toggleExt('ai', false)">OFF</button>
+                            <button class="sw-btn" id="ai_ext_on" onclick="toggleExt('ai', true)">ON</button>
+                        </div>
+                        <span class="ext-label">自律取得 [S-Search]</span>
+                        <div class="control-group" style="margin-bottom:0; scale:0.8;">
+                            <button class="sw-btn" id="ai_search_off" onclick="toggleSearch('ai', false)">OFF</button>
+                            <button class="sw-btn" id="ai_search_on" onclick="toggleSearch('ai', true)">ON</button>
+                        </div>
                     </div>
-                    <div class="input-box"><label>モデルURL</label><input type="text" id="ai_ext_url"></div>
+                    <div class="input-box"><label>モデルエンドポイント</label><input type="text" id="ai_ext_url" placeholder="https://api.openai.com/v1/chat/completions"></div>
                 </div>
 
                 <div style="display:flex; gap:10px;">
@@ -162,7 +174,7 @@
 
     <script>
         const curs = ["USD", "JPY", "EUR", "BTC", "ETH", "MATIC"];
-        let state = JSON.parse(localStorage.getItem('msgai_v35_4')) || {
+        let state = JSON.parse(localStorage.getItem('msgai_v35_5')) || {
             user: 'User_A', tension: 0.05,
             accounts: { User_A: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 }, User_B: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 } },
             hist: { acc: [], mint: [], tx: [], ai: [], sys: [] },
@@ -181,17 +193,13 @@
 
         window.setMode = (type, mode) => { state.modes[type] = mode; update(); };
         window.toggleExt = (type, val) => { state.ext[type] = val; update(); };
-        window.toggleSearch = (type, val) => { 
-            state.search[type] = val; 
-            if(val) runMobiusSearch(type); 
-            update(); 
-        };
+        window.toggleSearch = (type, val) => { state.search[type] = val; if(val) runMobiusSearch(type); update(); };
 
         async function runMobiusSearch(type) {
-            addHist('sys', `${type} 自律探索: w=1/z実行中...`, "SEARCHING");
+            addHist('sys', `${type} 自律探索実行`, "PENDING");
             const foundUrl = type === 'tx' ? "https://api.dex-v3.io/mainnet" : "https://api.arche-llm.ai/v1";
             document.getElementById(`${type}_ext_url`).value = foundUrl;
-            addHist('sys', `${type} 接続先特定完了`, foundUrl);
+            addHist('sys', `${type} 接続先を自律補完`, foundUrl);
         }
 
         function addHist(type, desc, amt) {
@@ -218,14 +226,11 @@
                 document.getElementById(`${k}_search_off`).classList.toggle('active', !state.search[k]);
             });
 
-            // 履歴表示の更新（直近10件と全履歴の両方）
-            const types = ['acc', 'mint', 'tx', 'ai', 'sys'];
-            types.forEach(t => {
+            ['acc', 'mint', 'tx', 'ai', 'sys'].forEach(t => {
                 renderHist(`${t}_hist_short`, state.hist[t], 10);
                 renderHist(`${t}_hist_full`, state.hist[t]);
             });
-
-            localStorage.setItem('msgai_v35_4', JSON.stringify(state));
+            localStorage.setItem('msgai_v35_5', JSON.stringify(state));
         }
 
         function renderHist(id, data, limit) {
@@ -245,7 +250,7 @@
             if(state.accounts[state.user][c] >= a) {
                 state.accounts[state.user][c] -= a; state.accounts[target][c] += a; state.tension *= 0.999;
                 addHist('tx', `内部移動 -> ${target}`, `-${a} ${c}`);
-                if(state.ext.tx) addHist('tx', "外部送信同期", document.getElementById('tx_ext_url').value);
+                if(state.ext.tx) addHist('tx', "外部同期実行", document.getElementById('tx_ext_url').value);
             }
         };
 
@@ -258,7 +263,7 @@
             log.scrollTop = log.scrollHeight;
         };
 
-        window.fullReset = () => { if(confirm("全データを初期化しますか？")) { localStorage.clear(); location.reload(); } };
+        window.fullReset = () => { if(confirm("初期化しますか？")) { localStorage.clear(); location.reload(); } };
 
         document.addEventListener('DOMContentLoaded', () => {
             curs.forEach(c => { document.getElementById('tx_cur').add(new Option(c, c)); document.getElementById('m_cur').add(new Option(c, c)); });
