@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>MSGAI - Sovereign V35.2</title>
+    <title>MSGAI - Sovereign V35.3</title>
     <style>
-        /* V32.2 のスタイルを継承 */
+        /* デザイン・スタイルはV32.2正典を維持 */
         :root { --accent: #007bff; --bg: #f4f7f9; --card-bg: #ffffff; --nav-bg: #000; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #1a1a1a; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         header { background: var(--nav-bg); color: #fff; z-index: 100; flex-shrink: 0; }
@@ -36,10 +36,10 @@
         .history-table { width: 100%; font-size: 0.75em; border-collapse: collapse; }
         .history-table td { padding: 4px 0; border-bottom: 1px solid #f8f9fa; }
 
-        /* V35.2 追加：外部接続設定エリア */
+        /* V35.3 外部設定エリア（自律検索スイッチ追加） */
         .ext-config { margin-top: 15px; padding: 15px; background: #f1f3f5; border-radius: 12px; border: 1px dashed #adb5bd; }
-        .ext-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .ext-toggle { font-size: 0.8em; font-weight: bold; color: #495057; }
+        .ext-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
+        .ext-label { font-size: 0.8em; font-weight: bold; color: #495057; }
     </style>
 </head>
 <body>
@@ -63,7 +63,7 @@
                     <button class="sw-btn" onclick="setMode('acc','S')">自律</button>
                 </div>
                 <div id="bal_list" class="status-grid"></div>
-                <div class="history-box"><div class="history-title">口座履歴 (直近10件)</div><table class="history-table" id="acc_hist_short"></table></div>
+                <div class="history-box"><div class="history-title">口座履歴</div><table class="history-table" id="acc_hist_short"></table></div>
             </div>
 
             <div class="card">
@@ -79,7 +79,7 @@
                 </div>
                 <input type="number" id="m_amt" value="100">
                 <button class="action-btn btn-orange" style="margin-top:10px" onclick="runMint()">生成実行</button>
-                <div class="history-box"><div class="history-title">生成履歴 (直近10件)</div><table class="history-table" id="mint_hist_short"></table></div>
+                <div class="history-box"><div class="history-title">生成履歴</div><table class="history-table" id="mint_hist_short"></table></div>
             </div>
 
             <div class="card">
@@ -97,18 +97,23 @@
                 
                 <div class="ext-config">
                     <div class="ext-header">
-                        <span class="ext-toggle">外部インフラ接続</span>
+                        <span class="ext-label">外部接続 [ON/OFF]</span>
                         <div class="control-group" style="margin-bottom:0; scale:0.8;">
                             <button class="sw-btn" id="tx_ext_off" onclick="toggleExt('tx', false)">OFF</button>
-                            <button class="sw-btn active" id="tx_ext_on" onclick="toggleExt('tx', true)">ON</button>
+                            <button class="sw-btn" id="tx_ext_on" onclick="toggleExt('tx', true)">ON</button>
+                        </div>
+                        <span class="ext-label">自律検索 [S-Search]</span>
+                        <div class="control-group" style="margin-bottom:0; scale:0.8;">
+                            <button class="sw-btn" id="tx_search_off" onclick="toggleSearch('tx', false)">OFF</button>
+                            <button class="sw-btn" id="tx_search_on" onclick="toggleSearch('tx', true)">ON</button>
                         </div>
                     </div>
-                    <div class="input-box"><label>接続先URL</label><input type="text" id="tx_ext_url" placeholder="https://api.dex.io/v1/..."></div>
-                    <div class="input-box"><label>認証キー</label><input type="password" id="tx_ext_key" placeholder="API Key / Wallet Private Key"></div>
+                    <div class="input-box"><label>接続先URL (自律時は自動入力)</label><input type="text" id="tx_ext_url"></div>
+                    <div class="input-box"><label>認証キー (自律時は自動検索)</label><input type="password" id="tx_ext_key"></div>
                 </div>
 
                 <button class="action-btn btn-blue" style="margin-top:10px" onclick="runTx()">移動実行</button>
-                <div class="history-box"><div class="history-title">移動履歴 (直近10件)</div><table class="history-table" id="tx_hist_short"></table></div>
+                <div class="history-box"><div class="history-title">移動履歴</div><table class="history-table" id="tx_hist_short"></table></div>
             </div>
         </section>
 
@@ -124,20 +129,25 @@
                 
                 <div class="ext-config" style="margin-bottom:10px;">
                     <div class="ext-header">
-                        <span class="ext-toggle">外部AIモデル同期</span>
+                        <span class="ext-label">外部同期 [ON/OFF]</span>
                         <div class="control-group" style="margin-bottom:0; scale:0.8;">
                             <button class="sw-btn" id="ai_ext_off" onclick="toggleExt('ai', false)">OFF</button>
-                            <button class="sw-btn active" id="ai_ext_on" onclick="toggleExt('ai', true)">ON</button>
+                            <button class="sw-btn" id="ai_ext_on" onclick="toggleExt('ai', true)">ON</button>
+                        </div>
+                        <span class="ext-label">モデル自律取得 [S-Search]</span>
+                        <div class="control-group" style="margin-bottom:0; scale:0.8;">
+                            <button class="sw-btn" id="ai_search_off" onclick="toggleSearch('ai', false)">OFF</button>
+                            <button class="sw-btn" id="ai_search_on" onclick="toggleSearch('ai', true)">ON</button>
                         </div>
                     </div>
-                    <div class="input-box"><label>モデルエンドポイント</label><input type="text" id="ai_ext_url" placeholder="https://api.openai.com/v1/..."></div>
+                    <div class="input-box"><label>モデルURL</label><input type="text" id="ai_ext_url"></div>
                 </div>
 
                 <div style="display:flex; gap:10px;">
                     <input type="text" id="ai-in" placeholder="メッセージ...">
                     <button class="btn-blue" style="border:none; border-radius:10px; padding:0 20px; color:white;" onclick="talk()">送信</button>
                 </div>
-                <div class="history-box"><div class="history-title">AI履歴 (直近10件)</div><table class="history-table" id="ai_hist_short"></table></div>
+                <div class="history-box"><div class="history-title">AI履歴</div><table class="history-table" id="ai_hist_short"></table></div>
             </div>
         </section>
 
@@ -149,21 +159,20 @@
                     <div class="metric"><div style="font-size:0.7em">Ratio (w=1/z)</div><div class="metric-value" id="w_val">20.00</div></div>
                 </div>
             </div>
-            <div class="card"><h2>全口座履歴</h2><table class="history-table" id="acc_hist_full"></table></div>
-            <div class="card"><h2>全移動履歴</h2><table class="history-table" id="tx_hist_full"></table></div>
-            <div class="card"><h2>全AI履歴</h2><table class="history-table" id="ai_hist_full"></table></div>
+            <div class="card"><h2>全履歴</h2><div id="all_hist"></div></div>
             <div class="card"><h2>システム管理</h2><button class="action-btn" style="background:#718096;" onclick="fullReset()">システム初期化</button></div>
         </section>
     </main>
 
     <script>
         const curs = ["USD", "JPY", "EUR", "BTC", "ETH", "MATIC"];
-        let state = JSON.parse(localStorage.getItem('msgai_v35_2')) || {
+        let state = JSON.parse(localStorage.getItem('msgai_v35_3')) || {
             user: 'User_A', tension: 0.05,
             accounts: { User_A: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 }, User_B: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 } },
             hist: { acc: [], mint: [], tx: [], ai: [], sys: [] },
             modes: { acc:'M', mint:'M', tx:'M', ai:'M' },
-            ext: { tx: true, ai: true } // 外部接続のオンオフ状態
+            ext: { tx: false, ai: false },
+            search: { tx: false, ai: false } // 自律検索スイッチの状態
         };
 
         window.openTab = (name) => {
@@ -175,6 +184,19 @@
 
         window.setMode = (type, mode) => { state.modes[type] = mode; update(); };
         window.toggleExt = (type, val) => { state.ext[type] = val; update(); };
+        window.toggleSearch = (type, val) => { 
+            state.search[type] = val; 
+            if(val) runMobiusSearch(type); // ONになったら検索起動
+            update(); 
+        };
+
+        async function runMobiusSearch(type) {
+            addHist('sys', `${type} の自律探索を開始...`, "SEARCH-ON");
+            // 擬似的な検索＝関数 w=1/z
+            const foundUrl = type === 'tx' ? "https://api.dex-v3.io/mainnet" : "https://api.arche-llm.ai/v1";
+            document.getElementById(`${type}_ext_url`).value = foundUrl;
+            addHist('sys', `${type} 接続先を自律的に特定しました`, foundUrl);
+        }
 
         function addHist(type, desc, amt) {
             state.hist[type].push({ time: new Date().toLocaleTimeString(), desc, amt });
@@ -188,7 +210,6 @@
                 `<div class="metric"><div style="font-size:0.7em">${c}</div><div class="metric-value">${(state.accounts[state.user][c]||0).toLocaleString()}</div></div>`
             ).join('');
 
-            // UIボタンの同期
             ['acc','mint','tx','ai'].forEach(k => {
                 const btns = document.querySelectorAll(`#ctrl_${k} .sw-btn`);
                 btns.forEach(b => b.classList.toggle('active', b.innerText === (state.modes[k]==='M'?'手動':state.modes[k]==='A'?'自動':'自律')));
@@ -196,11 +217,12 @@
             ['tx','ai'].forEach(k => {
                 document.getElementById(`${k}_ext_on`).classList.toggle('active', state.ext[k]);
                 document.getElementById(`${k}_ext_off`).classList.toggle('active', !state.ext[k]);
+                document.getElementById(`${k}_search_on`).classList.toggle('active', state.search[k]);
+                document.getElementById(`${k}_search_off`).classList.toggle('active', !state.search[k]);
             });
 
-            const types = ['acc', 'mint', 'tx', 'ai'];
-            types.forEach(t => { renderHist(`${t}_hist_short`, state.hist[t], 10); renderHist(`${t}_hist_full`, state.hist[t]); });
-            localStorage.setItem('msgai_v35_2', JSON.stringify(state));
+            ['acc', 'mint', 'tx', 'ai'].forEach(t => renderHist(`${t}_hist_short`, state.hist[t], 10));
+            localStorage.setItem('msgai_v35_3', JSON.stringify(state));
         }
 
         function renderHist(id, data, limit) {
@@ -216,35 +238,17 @@
         };
 
         window.runTx = () => {
-            const isExt = state.ext.tx;
-            const url = document.getElementById('tx_ext_url').value;
-            const mode = state.modes.tx;
-
-            if (mode === 'S') {
-                addHist('tx', "自律検索エンジンが接続先を最適化中...", "S-LOGIC");
-                // ここに MobiusEngine.harvest() を後で繋ぐ
-            }
-
-            if (isExt && url) {
-                addHist('tx', `外部送信試行: ${url}`, "PENDING");
-            }
-
             const c = document.getElementById('tx_cur').value, a = parseFloat(document.getElementById('amt_in').value), target = document.getElementById('rx_in').value;
             if(state.accounts[state.user][c] >= a) {
                 state.accounts[state.user][c] -= a; state.accounts[target][c] += a; state.tension *= 0.999;
                 addHist('tx', `内部移動 -> ${target}`, `-${a} ${c}`);
+                if(state.ext.tx) addHist('tx', "外部同期実行中", document.getElementById('tx_ext_url').value);
             }
         };
 
         window.talk = () => {
             const input = document.getElementById('ai-in'); if(!input.value) return;
-            const isExt = state.ext.ai;
-            const mode = state.modes.ai;
-
             addHist('ai', "発話", input.value);
-            if (mode === 'S') { addHist('ai', "自律思考中（裏側検索併用）", "S-THINK"); }
-            if (isExt) { addHist('ai', "外部AI API同期実行", "EXT-SYNC"); }
-
             const log = document.getElementById('ai-log');
             log.innerHTML += `<div style="text-align:right; margin-bottom:5px;"><span style="background:var(--accent); color:white; padding:5px 10px; border-radius:10px;">${input.value}</span></div>`;
             input.value = "";
