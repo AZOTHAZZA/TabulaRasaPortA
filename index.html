@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>MSGAI - Sovereign V32.3</title>
+    <title>MSGAI - Sovereign V32.4</title>
     <style>
-        :root { --accent: #007bff; --bg: #f4f7f9; --card-bg: #ffffff; --nav-bg: #000; }
+        :root { --accent: #007bff; --bg: #f4f7f9; --card-bg: #ffffff; --nav-bg: #000; --sync: #28a745; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #1a1a1a; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
         header { background: var(--nav-bg); color: #fff; z-index: 100; flex-shrink: 0; }
@@ -23,25 +23,26 @@
         .card { background: var(--card-bg); border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e1e4e8; margin-bottom: 20px; }
         h2 { margin: 0 0 15px 0; font-size: 1.1em; border-left: 5px solid var(--accent); padding-left: 12px; display: flex; justify-content: space-between; align-items: center; }
 
-        /* スイッチ視認性：極太・高コントラスト */
+        /* メインスイッチ（極太） */
         .control-group { display: flex; background: #ddd; border-radius: 8px; padding: 3px; margin-bottom: 15px; width: fit-content; }
         .sw-btn { border: none; background: none; padding: 6px 16px; font-size: 0.85em; font-weight: 900; cursor: pointer; border-radius: 6px; color: #444; transition: 0.2s; }
-        .sw-btn.active { background: #000; color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .sw-btn.active { background: #000; color: #fff; }
+
+        /* 外部同期専用小型オンオフスイッチ */
+        .sync-toggle { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 0.8em; font-weight: bold; }
+        .tgl-btn { border: 1px solid #ccc; background: #eee; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+        .tgl-btn.on { background: var(--sync); color: white; border-color: var(--sync); }
 
         .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
         .metric { background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #edf2f7; text-align: center; }
         .metric-value { font-size: 1.2em; font-weight: bold; font-family: 'Consolas', monospace; }
         
-        .input-box { margin-bottom: 12px; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
-        
-        .action-btn { width: 100%; padding: 16px; border: none; border-radius: 12px; color: #fff; font-weight: bold; font-size: 1.0em; cursor: pointer; margin-bottom: 8px; }
+        .action-btn { width: 100%; padding: 16px; border: none; border-radius: 12px; color: #fff; font-weight: bold; cursor: pointer; margin-bottom: 8px; transition: 0.3s; }
         .btn-orange { background: #fd7e14; }
         .btn-blue { background: var(--accent); }
-        .btn-sync { background: #28a745; font-size: 0.8em; padding: 10px; } /* 外部同期用カラー */
+        .btn-sync { background: var(--sync); font-size: 0.8em; padding: 10px; }
+        .btn-sync:disabled { background: #ccc; cursor: not-allowed; opacity: 0.5; }
 
-        .history-box { margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
-        .history-title { font-size: 0.8em; font-weight: bold; color: #718096; margin-bottom: 8px; }
         .history-table { width: 100%; font-size: 0.75em; border-collapse: collapse; }
         .history-table td { padding: 4px 0; border-bottom: 1px solid #f8f9fa; }
     </style>
@@ -59,181 +60,108 @@
 
     <main id="viewport">
         <section id="currency" class="tab-pane active">
-            <div class="card">
-                <h2>口座</h2>
-                <div class="control-group" id="ctrl_acc">
-                    <button class="sw-btn active" onclick="setMode('acc','M')">手動</button>
-                    <button class="sw-btn" onclick="setMode('acc','A')">自動</button>
-                    <button class="sw-btn" onclick="setMode('acc','S')">自律</button>
-                </div>
-                <div id="bal_list" class="status-grid"></div>
-                <div class="history-box"><div class="history-title">口座履歴 (直近10件)</div><table class="history-table" id="acc_hist_short"></table></div>
-            </div>
-
-            <div class="card">
-                <h2>生成</h2>
-                <div class="control-group" id="ctrl_mint">
-                    <button class="sw-btn active" onclick="setMode('mint','M')">手動</button>
-                    <button class="sw-btn" onclick="setMode('mint','A')">自動</button>
-                    <button class="sw-btn" onclick="setMode('mint','S')">自律</button>
-                </div>
-                <div class="status-grid"><div class="input-box"><label>対象通貨</label><select id="m_cur"></select></div><div class="input-box"><label>数量</label><input type="number" id="m_amt" value="100"></div></div>
-                <button class="action-btn btn-orange" onclick="runMint()">生成実行</button>
-                <div class="history-box"><div class="history-title">生成履歴 (直近10件)</div><table class="history-table" id="mint_hist_short"></table></div>
-            </div>
+            <div class="card"><h2>口座</h2><div id="bal_list" class="status-grid"></div></div>
 
             <div class="card">
                 <h2>移動</h2>
-                <div class="control-group" id="ctrl_tx">
-                    <button class="sw-btn active" onclick="setMode('tx','M')">手動</button>
-                    <button class="sw-btn" onclick="setMode('tx','A')">自動</button>
-                    <button class="sw-btn" onclick="setMode('tx','S')">自律</button>
+                <div class="sync-toggle">
+                    <span>外部API同期:</span>
+                    <button id="tgl-tx" class="tgl-btn" onclick="toggleSync('tx')">OFF</button>
                 </div>
-                <div class="status-grid"><div class="input-box"><label>宛先</label><input type="text" id="rx_in" value="User_B"></div><div class="input-box"><label>通貨</label><select id="tx_cur"></select></div></div>
+                <div class="status-grid">
+                    <div class="input-box"><label>宛先</label><input type="text" id="rx_in" value="User_B"></div>
+                    <div class="input-box"><label>通貨</label><select id="tx_cur"></select></div>
+                </div>
                 <div class="input-box"><input type="number" id="amt_in" value="10"></div>
                 <button class="action-btn btn-blue" onclick="runTx()">内部移動実行</button>
-                <button class="action-btn btn-sync" onclick="runExternalTxSync()">外部API移動同期 (Mimicry)</button>
-                <div class="history-box"><div class="history-title">移動履歴 (直近10件)</div><table class="history-table" id="tx_hist_short"></table></div>
+                <button id="btn-tx-sync" class="action-btn btn-sync" onclick="runExternalTxSync()" disabled>外部API移動同期 (Mimicry)</button>
             </div>
         </section>
 
         <section id="ai" class="tab-pane">
             <div class="card" style="height:70vh; display:flex; flex-direction:column;">
                 <h2>AI</h2>
-                <div class="control-group" id="ctrl_ai"><button class="sw-btn active" onclick="setMode('ai','M')">手動</button><button class="sw-btn" onclick="setMode('ai','A')">自動</button><button class="sw-btn" onclick="setMode('ai','S')">自律</button></div>
-                <div id="ai-log" style="flex-grow:1; overflow-y:auto; padding:10px; background:#f8fafc; border-radius:10px; font-size: 0.9em; border: 1px solid #eee;"></div>
-                <div style="display:flex; flex-direction:column; gap:5px; margin-top:10px;">
-                    <div style="display:flex; gap:10px;">
-                        <input type="text" id="ai-in" placeholder="メッセージ...">
-                        <button class="btn-blue" style="border:none; border-radius:10px; padding:0 20px; color:white;" onclick="talk()">送信</button>
-                    </div>
-                    <button class="action-btn btn-sync" onclick="runExternalAiSync()">外部AIモデル擬態同期 (Arche Correct)</button>
+                <div class="sync-toggle">
+                    <span>外部AI擬態:</span>
+                    <button id="tgl-ai" class="tgl-btn" onclick="toggleSync('ai')">OFF</button>
                 </div>
-                <div class="history-box"><div class="history-title">AI履歴 (直近10件)</div><table class="history-table" id="ai_hist_short"></table></div>
+                <div id="ai-log" style="flex-grow:1; overflow-y:auto; padding:10px; background:#f8fafc; border-radius:10px; border: 1px solid #eee; margin-bottom:10px;"></div>
+                <div style="display:flex; gap:10px; margin-bottom:5px;">
+                    <input type="text" id="ai-in" style="flex-grow:1; padding:10px; border-radius:8px; border:1px solid #ccc;">
+                    <button class="btn-blue" style="border:none; border-radius:8px; padding:0 20px; color:white;" onclick="talk()">送信</button>
+                </div>
+                <button id="btn-ai-sync" class="action-btn btn-sync" onclick="runExternalAiSync()" disabled>外部AIモデル擬態同期 (Arche Correct)</button>
             </div>
         </section>
 
         <section id="system" class="tab-pane">
-            <div class="card">
-                <h2>システムステータス</h2>
-                <div class="control-group" id="ctrl_sys"><button class="sw-btn active" onclick="setMode('sys','M')">手動</button><button class="sw-btn" onclick="setMode('sys','A')">自動</button><button class="sw-btn" onclick="setMode('sys','S')">自律</button></div>
-                <div class="status-grid">
-                    <div class="metric"><div style="font-size:0.7em">Tension (z)</div><div class="metric-value" id="t_val">0.05</div></div>
-                    <div class="metric"><div style="font-size:0.7em">Ratio (w=1/z)</div><div class="metric-value" id="w_val">20.00</div></div>
-                </div>
-            </div>
+            <div class="card"><h2>システムステータス</h2><div class="status-grid"><div class="metric">z: <span id="t_val"></span></div><div class="metric">w: <span id="w_val"></span></div></div></div>
             <div class="card"><h2>全口座履歴</h2><table class="history-table" id="acc_hist_full"></table></div>
             <div class="card"><h2>全生成履歴</h2><table class="history-table" id="mint_hist_full"></table></div>
             <div class="card"><h2>全移動履歴</h2><table class="history-table" id="tx_hist_full"></table></div>
             <div class="card"><h2>全AI履歴</h2><table class="history-table" id="ai_hist_full"></table></div>
             <div class="card"><h2>全システムステータス履歴</h2><table class="history-table" id="sys_hist_full"></table></div>
-            <div class="card"><h2>全システム初期化履歴</h2><table class="history-table" id="reset_hist_full"></table></div>
-            <div class="card">
-                <h2>システム管理</h2>
-                <div class="control-group" id="ctrl_reset"><button class="sw-btn active" onclick="setMode('reset','M')">手動</button><button class="sw-btn" onclick="setMode('reset','A')">自動</button><button class="sw-btn" onclick="setMode('reset','S')">自律</button></div>
-                <button class="action-btn" style="background:#718096;" onclick="fullReset()">システム初期化</button>
-            </div>
         </section>
     </main>
 
     <script>
         const curs = ["USD", "JPY", "EUR", "BTC", "ETH", "MATIC"];
         const PHI = 1.6180339887;
-        
-        let state = JSON.parse(localStorage.getItem('msgai_v32_3_base')) || {
-            user: 'User_A', tension: 0.05,
-            accounts: { User_A: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 }, User_B: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 } },
-            hist: { acc: [], mint: [], tx: [], ai: [], sys: [], reset: [] },
-            modes: { acc:'M', mint:'M', tx:'M', ai:'M', sys:'M', reset:'M' }
+        let state = JSON.parse(localStorage.getItem('msgai_v32_4')) || {
+            tension: 0.05,
+            accounts: { User_A: { USD: 100, JPY: 10000 }, User_B: { USD: 0, JPY: 0 } },
+            hist: { acc: [], mint: [], tx: [], ai: [], sys: [] },
+            sync: { tx: false, ai: false }
         };
 
-        window.openTab = (name) => {
+        window.openTab = (n) => {
             document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(name).classList.add('active');
-            document.getElementById('btn-' + name).classList.add('active');
+            document.getElementById(n).classList.add('active');
+            document.getElementById('btn-' + n).classList.add('active');
             update();
         };
 
-        window.setMode = (type, mode) => { state.modes[type] = mode; update(); };
-
-        function addHist(type, desc, amt) {
-            state.hist[type].push({ time: new Date().toLocaleTimeString(), desc, amt });
+        // 同期スイッチの切り替え
+        window.toggleSync = (type) => {
+            state.sync[type] = !state.sync[type];
             update();
-        }
+        };
 
         function update() {
             document.getElementById('t_val').textContent = state.tension.toFixed(6);
-            document.getElementById('w_val').textContent = (1/(state.tension||0.000001)).toFixed(2);
-            document.getElementById('bal_list').innerHTML = curs.map(c => 
-                `<div class="metric"><div style="font-size:0.7em">${c}</div><div class="metric-value">${(state.accounts[state.user][c]||0).toLocaleString()}</div></div>`
+            document.getElementById('w_val').textContent = (1/state.tension).toFixed(2);
+            
+            // スイッチ状態の反映
+            ['tx', 'ai'].forEach(t => {
+                const btn = document.getElementById(`tgl-${t}`);
+                const act = document.getElementById(`btn-${t}-sync`);
+                if(state.sync[t]) {
+                    btn.innerText = "ON"; btn.classList.add('on'); act.disabled = false;
+                } else {
+                    btn.innerText = "OFF"; btn.classList.remove('on'); act.disabled = true;
+                }
+            });
+
+            document.getElementById('bal_list').innerHTML = Object.keys(state.accounts.User_A).map(c => 
+                `<div class="metric"><div style="font-size:0.7em">${c}</div><div class="metric-value">${state.accounts.User_A[c].toLocaleString()}</div></div>`
             ).join('');
 
-            Object.keys(state.modes).forEach(k => {
-                const btns = document.querySelectorAll(`#ctrl_${k} .sw-btn`);
-                btns.forEach(b => {
-                    b.classList.remove('active');
-                    if(b.innerText === (state.modes[k]==='M'?'手動':state.modes[k]==='A'?'自動':'自律')) b.classList.add('active');
-                });
+            ['acc', 'mint', 'tx', 'ai', 'sys'].forEach(t => {
+                const el = document.getElementById(`${t}_hist_full`);
+                if(el) el.innerHTML = [...state.hist[t]].reverse().map(h => `<tr><td>${h.time}</td><td>${h.desc}</td><td style="text-align:right;">${h.amt}</td></tr>`).join('');
             });
-
-            const types = ['acc', 'mint', 'tx', 'ai', 'sys', 'reset'];
-            types.forEach(t => {
-                const shortEl = document.getElementById(`${t}_hist_short`);
-                const fullEl = document.getElementById(`${t}_hist_full`);
-                const items = [...state.hist[t]].reverse();
-                if(shortEl) shortEl.innerHTML = items.slice(0, 10).map(h => `<tr><td>${h.time}</td><td>${h.desc}</td><td style="text-align:right; font-weight:bold;">${h.amt}</td></tr>`).join('');
-                if(fullEl) fullEl.innerHTML = items.map(h => `<tr><td>${h.time}</td><td>${h.desc}</td><td style="text-align:right; font-weight:bold;">${h.amt}</td></tr>`).join('');
-            });
-            localStorage.setItem('msgai_v32_3_base', JSON.stringify(state));
+            localStorage.setItem('msgai_v32_4', JSON.stringify(state));
         }
 
-        // --- 外部API移動同期 (移動カード用) ---
-        window.runExternalTxSync = () => {
-            const c = document.getElementById('tx_cur').value;
-            const a = parseFloat(document.getElementById('amt_in').value);
-            const target = document.getElementById('rx_in').value;
-            // アルケー補正による擬態
-            const correctedAmt = a * (1 / (state.tension * PHI)); 
-            addHist('tx', `外部API擬態移動 -> ${target}`, `${correctedAmt.toFixed(2)} ${c}`);
-            addHist('sys', '移動プロトコル補正', `w=1/z*Φ`);
-            alert(`外部ネットワーク(DEX/Bank)への擬態送金プロトコルを開始しました。\n補正数量: ${correctedAmt.toFixed(4)}`);
-        };
+        window.runExternalTxSync = () => { if(!state.sync.tx) return; alert("外部移動同期実行中..."); };
+        window.runExternalAiSync = () => { if(!state.sync.ai) return; alert("外部AI擬態通信中..."); };
 
-        // --- 外部AIモデル擬態同期 (AIカード用) ---
-        window.runExternalAiSync = () => {
-            const log = document.getElementById('ai-log');
-            const msg = "外部アルケー補正による擬態応答を受信中...";
-            log.innerHTML += `<div style="margin-bottom:5px;"><span style="background:#eee; padding:5px 10px; border-radius:10px; font-style:italic;">${msg}</span></div>`;
-            addHist('ai', '外部AI擬態同期', ' Arche-Sync');
-            addHist('sys', 'AI通信アルケー補正', `z=${state.tension.toFixed(4)}`);
-        };
-
-        window.runMint = () => {
-            const c = document.getElementById('m_cur').value, a = parseFloat(document.getElementById('m_amt').value), target = document.getElementById('m_rx').value;
-            state.accounts[target][c] += a; state.tension += 0.001;
-            addHist('mint', `生成 (${target})`, `+${a} ${c}`);
-        };
-
-        window.runTx = () => {
-            const c = document.getElementById('tx_cur').value, a = parseFloat(document.getElementById('amt_in').value), target = document.getElementById('rx_in').value;
-            if(state.accounts[state.user][c] >= a) {
-                state.accounts[state.user][c] -= a; state.accounts[target][c] += a; state.tension *= 0.999;
-                addHist('tx', `内部移動 -> ${target}`, `-${a} ${c}`);
-            }
-        };
-
-        window.talk = () => {
-            const input = document.getElementById('ai-in'); if(!input.value) return;
-            addHist('ai', "発話", input.value);
-            document.getElementById('ai-log').innerHTML += `<div style="text-align:right; margin-bottom:5px;"><span style="background:var(--accent); color:white; padding:5px 10px; border-radius:10px;">${input.value}</span></div>`;
-            input.value = "";
-        };
-
-        window.fullReset = () => { if(confirm("初期化しますか？")) { localStorage.clear(); location.reload(); } };
+        window.runTx = () => { /* 内部移動ロジック */ state.tension *= 0.999; update(); };
+        window.talk = () => { /* AI発話ロジック */ update(); };
 
         document.addEventListener('DOMContentLoaded', () => {
-            curs.forEach(c => { document.getElementById('tx_cur').add(new Option(c, c)); document.getElementById('m_cur').add(new Option(c, c)); });
+            curs.forEach(c => { document.getElementById('tx_cur').add(new Option(c, c)); });
             update();
         });
     </script>
