@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MSGAI - Sovereign V36.9</title>
+<title>MSGAI - Sovereign V36.9.1</title>
 <style>
-/* CORE ARCHITECTURE: LOGOS-BASED DESIGN */
+/* ARCHITECTURAL POLICY: PHI-BASED DESIGN */
 :root {
     --ratio: 1.6180339887;
     --accent: #007bff;
@@ -17,41 +17,39 @@
 body { font-family: 'Inter', system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
 header { background: #000; color: #fff; padding: 12px 20px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); }
-.brand { font-weight: 800; letter-spacing: 0.1em; font-size: 1rem; }
-.lang-selector { background: #222; color: #fff; border: 1px solid #444; font-size: 0.7rem; padding: 4px; border-radius: 4px; }
+.brand { font-weight: 800; letter-spacing: 0.15em; font-size: 0.9rem; color: #fff; }
+.lang-selector { background: #222; color: #fff; border: 1px solid #444; font-size: 0.7rem; padding: 4px; border-radius: 4px; outline: none; }
 
-nav { display: flex; background: #111; }
-.tab { flex: 1; padding: 14px; border: none; background: none; color: #666; font-weight: bold; cursor: pointer; font-size: 0.75rem; border-bottom: 3px solid transparent; }
+nav { display: flex; background: #111; border-bottom: 1px solid #333; }
+.tab { flex: 1; padding: 14px; border: none; background: none; color: #666; font-weight: bold; cursor: pointer; font-size: 0.7rem; border-bottom: 3px solid transparent; transition: 0.3s; }
 .tab.active { color: #fff; border-bottom-color: var(--accent); background: #1a1a1a; }
 
 #viewport { flex-grow: 1; overflow-y: auto; padding: 15px; }
-.pane { display: none; width: 100%; max-width: 800px; margin: 0 auto; }
+.pane { display: none; width: 100%; max-width: 850px; margin: 0 auto; animation: fadeIn 0.3s ease; }
 .pane.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-.card { background: var(--surface); border-radius: 10px; border: 1px solid #ddd; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-.card-title { font-size: 0.7rem; font-weight: 700; color: #999; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.05em; border-left: 3px solid var(--accent); padding-left: 10px; }
+.card { background: var(--surface); border-radius: 12px; border: 1px solid #ddd; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); }
+.card-title { font-size: 0.65rem; font-weight: 700; color: #aaa; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.1em; border-left: 3px solid var(--accent); padding-left: 10px; }
 
-.policy-group { display: flex; gap: 5px; margin-bottom: 15px; background: #f0f0f0; padding: 4px; border-radius: 6px; width: fit-content; }
-.policy-btn { padding: 6px 12px; font-size: 0.65rem; border: none; border-radius: 4px; cursor: pointer; color: #888; background: none; transition: 0.2s; }
-.policy-btn.active { background: #fff; color: var(--accent); font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-
-.data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+.data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; }
 .data-node { background: #fafafa; border: 1px solid #eee; padding: 12px; border-radius: 8px; text-align: center; }
 .label { font-size: 0.6rem; color: #aaa; margin-bottom: 4px; }
-.value { font-family: 'Consolas', monospace; font-weight: bold; font-size: 1rem; }
+.value { font-family: 'Consolas', monospace; font-weight: bold; font-size: 0.95rem; }
 
-input, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem; }
-.btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: #fff; transition: 0.2s; }
+input, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; background: #fff; }
+.btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: #fff; transition: 0.2s; font-size: 0.8rem; letter-spacing: 0.05em; }
 .btn-primary { background: var(--accent); }
 .btn-danger { background: #e03131; }
+.btn-secondary { background: #444; }
 
-#console { background: #000; color: #00ff41; padding: 15px; font-family: monospace; font-size: 0.8rem; height: 300px; overflow-y: auto; border-radius: 6px; margin-bottom: 10px; }
+#console { background: #000; color: #00ff41; padding: 15px; font-family: 'Consolas', monospace; font-size: 0.8rem; height: 320px; overflow-y: auto; border-radius: 8px; border: 1px solid #333; }
 </style>
 </head>
 <body>
 
 <header>
-    <div class="brand">MSGAI V36.9</div>
+    <div class="brand">MSGAI SOVEREIGN V36.9.1</div>
     <select class="lang-selector" id="lang-policy" onchange="changeLang()">
         <option value="en">English (System)</option>
         <option value="jp">日本語 (Logos)</option>
@@ -74,16 +72,20 @@ input, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px sol
             <div class="card-title" data-key="title_ledger">Ledger Status</div>
             <div id="ledger-grid" class="data-grid"></div>
         </div>
-        <div class="card">
-            <div class="card-title" data-key="title_synth">Synthesis</div>
-            <div class="policy-group">
-                <button class="policy-btn active" data-key="mode_man" onclick="setMode('man')">MANUAL</button>
-                <button class="policy-btn" data-key="mode_auto" onclick="setMode('auto')">AUTO</button>
-                <button class="policy-btn" data-key="mode_autonomous" onclick="setMode('autonomous')">AUTONOMOUS</button>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="card">
+                <div class="card-title" data-key="title_synth">Data Calibration</div>
+                <select id="syn-asset"></select>
+                <input type="number" id="syn-amount" value="100">
+                <button class="btn btn-danger" data-key="btn_syn" onclick="doSynth()">PROCESS</button>
             </div>
-            <select id="syn-asset"></select>
-            <input type="number" id="syn-amount" value="100">
-            <button class="btn btn-danger" data-key="btn_syn" onclick="doSynth()">EXECUTE</button>
+            <div class="card">
+                <div class="card-title" data-key="title_adj">Flux Recalibration</div>
+                <select id="adj-target"></select>
+                <input type="number" id="adj-flux" value="50">
+                <button class="btn btn-primary" data-key="btn_adj" onclick="doRecalibrate()">APPLY FLUX</button>
+            </div>
         </div>
     </section>
 
@@ -91,7 +93,7 @@ input, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px sol
         <div class="card">
             <div class="card-title" data-key="title_transform">Logos Transform</div>
             <div id="console"></div>
-            <div style="display: flex; gap: 8px; margin-top:10px;">
+            <div style="display: flex; gap: 8px; margin-top:12px;">
                 <input type="text" id="engine-in" placeholder="..." onkeydown="if(event.key==='Enter') doTransform()">
                 <button class="btn btn-primary" style="width: 80px;" data-key="btn_send" onclick="doTransform()">SEND</button>
             </div>
@@ -108,7 +110,7 @@ input, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px sol
         </div>
         <div class="card">
             <div class="card-title" data-key="title_purge">Normalization</div>
-            <button class="btn btn-primary" style="background:#888; margin-bottom:10px;" data-key="btn_reset_ledger" onclick="resetPart('accounts')">Reset Ledger</button>
+            <button class="btn btn-secondary" style="margin-bottom:10px;" data-key="btn_reset_ledger" onclick="resetPart()">Reset Logic</button>
             <button class="btn btn-danger" data-key="btn_reset_all" onclick="fullReset()">Full Re-initialization</button>
         </div>
     </section>
@@ -118,54 +120,41 @@ input, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px sol
 const ASSETS = ["USD","JPY","EUR","BTC","ETH","MATIC"];
 const PHI = 1.6180339887;
 
+/* ASYMMETRIC DICTIONARY: Western(Security) vs Asian(Logos) */
 const DICTIONARY = {
     en: {
-        title_ledger: "Ledger Status", title_synth: "Value Synthesis", btn_syn: "EXECUTE SYNTHESIS",
-        title_transform: "Logos Transform", btn_send: "SEND", title_monitor: "Integrity Monitor",
+        title_ledger: "State Overview", title_synth: "Data Calibration", btn_syn: "PROCESS DATA",
+        title_adj: "Flux Recalibration", btn_adj: "APPLY FLUX", label_dest: "Target Axis",
+        title_transform: "Logos Transform", btn_send: "SEND", title_monitor: "System Monitor",
         label_z: "Tension (z)", label_w: "Harmonic Ratio (w)", title_purge: "Normalization",
-        btn_reset_ledger: "Reset Ledger", btn_reset_all: "Full Reset",
-        mode_man: "MANUAL", mode_auto: "AUTO", mode_autonomous: "AUTONOMOUS"
+        btn_reset_ledger: "Reset Logic", btn_reset_all: "Full Reset"
     },
     jp: {
         title_ledger: "均衡状態 / 台帳", title_synth: "事象生成 / 統合", btn_syn: "現出（Execute）",
+        title_adj: "因果の移動 / 均衡の転送", btn_adj: "転送実行", label_dest: "帰属先 / 境界",
         title_transform: "因果変換律（Logos）", btn_send: "投射", title_monitor: "理（ロゴス）の観測",
         label_z: "緊張度 (z)", label_w: "調和比 (w)", title_purge: "原点回帰 / 浄化",
-        btn_reset_ledger: "台帳を零に戻す", btn_reset_all: "全系の浄化（再起動）",
-        mode_man: "個の意志", mode_auto: "律動", mode_autonomous: "自律微細ロゴス"
+        btn_reset_ledger: "台帳を零に戻す", btn_reset_all: "全系の浄化（再起動）"
     },
     zh: {
         title_ledger: "均衡状态 / 账本", title_synth: "事象生成 / 综合", btn_syn: "显现（Execute）",
+        title_adj: "因果转换 / 均衡转移", btn_adj: "执行转移", label_dest: "归属轴",
         title_transform: "因果转换律", btn_send: "投射", title_monitor: "理（Logos）的观测",
         label_z: "紧张度 (z)", label_w: "调和比 (w)", title_purge: "原点回归 / 净化",
-        btn_reset_ledger: "账本清零", btn_reset_all: "全系统净化",
-        mode_man: "个人意志", mode_auto: "律动", mode_autonomous: "自律逻辑"
+        btn_reset_ledger: "账本清零", btn_reset_all: "全系统净化"
     },
     ko: {
         title_ledger: "균형 상태 / 장부", title_synth: "사상 생성 / 통합", btn_syn: "현현（Execute）",
+        title_adj: "인과 이동 / 균형 전송", btn_adj: "전송 실행", label_dest: "귀속지",
         title_transform: "인과 변환율", btn_send: "투사", title_monitor: "이(Logos)의 관측",
         label_z: "긴장도 (z)", label_w: "조화비 (w)", title_purge: "원점 회귀 / 정화",
-        btn_reset_ledger: "장부 초기화", btn_reset_all: "전계 정화（재기동）",
-        mode_man: "개인의 의지", mode_auto: "율동", mode_autonomous: "자율적 로고스"
-    },
-    fr: {
-        title_ledger: "État du Grand Livre", title_synth: "Synthèse de Valeur", btn_syn: "EXÉCUTER",
-        title_transform: "Moteur de Logos", btn_send: "ENVOYER", title_monitor: "Moniteur d'Intégrité",
-        label_z: "Tension (z)", label_w: "Rapport Harmonique (w)", title_purge: "Normalisation",
-        btn_reset_ledger: "Réinitialiser", btn_reset_all: "Réinitialisation Totale",
-        mode_man: "MANUEL", mode_auto: "AUTO", mode_autonomous: "AUTONOME"
-    },
-    de: {
-        title_ledger: "Kontostand", title_synth: "Wertsynthese", btn_syn: "AUSFÜHREN",
-        title_transform: "Logos-Engine", btn_send: "SENDEN", title_monitor: "Integritätsmonitor",
-        label_z: "Spannung (z)", label_w: "Harmonisches Verhältnis (w)", title_purge: "Normalisierung",
-        btn_reset_ledger: "Konten zurücksetzen", btn_reset_all: "Vollständige Reinigung",
-        mode_man: "MANUELL", mode_auto: "AUTO", mode_autonomous: "AUTONOM"
+        btn_reset_ledger: "장부 초기화", btn_reset_all: "전계 정화"
     }
 };
 
-let state = JSON.parse(localStorage.getItem('msgai_v36_9_core')) || {
-    z: 0.05, accounts: { User_A: Object.fromEntries(ASSETS.map(a => [a, 0])) },
-    hist: { mint: [], ai: [] }, lang: 'en', mode: 'man'
+let state = JSON.parse(localStorage.getItem('msgai_v36_9_1_core')) || {
+    z: 0.05, accounts: { User_A: Object.fromEntries(ASSETS.map(a => [a, 0])), System: Object.fromEntries(ASSETS.map(a => [a, 1000])) },
+    lang: 'en'
 };
 
 const getW = (z) => PHI / (z || 0.000001);
@@ -174,7 +163,7 @@ function updateUI() {
     const lang = state.lang || 'en';
     document.querySelectorAll('[data-key]').forEach(el => {
         const key = el.getAttribute('data-key');
-        if(DICTIONARY[lang][key]) el.textContent = DICTIONARY[lang][key];
+        if(DICTIONARY[lang] && DICTIONARY[lang][key]) el.textContent = DICTIONARY[lang][key];
     });
 
     document.getElementById('z-val').textContent = state.z.toFixed(6);
@@ -182,8 +171,7 @@ function updateUI() {
     document.getElementById('ledger-grid').innerHTML = ASSETS.map(a => `
         <div class="data-node"><div class="label">${a}</div><div class="value">${(state.accounts.User_A[a] || 0).toFixed(4)}</div></div>
     `).join('');
-
-    localStorage.setItem('msgai_v36_9_core', JSON.stringify(state));
+    localStorage.setItem('msgai_v36_9_1_core', JSON.stringify(state));
 }
 
 function changeLang() {
@@ -191,32 +179,36 @@ function changeLang() {
     updateUI();
 }
 
-function setMode(m) {
-    state.mode = m;
-    document.querySelectorAll('.policy-btn').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
-    updateUI();
-}
-
 function doSynth() {
     const asset = document.getElementById('syn-asset').value;
     const amt = parseFloat(document.getElementById('syn-amount').value);
-    const z = (asset.length/40) + (amt/1000);
-    const w = getW(z);
+    const z_inc = (amt / 2000) + (asset.length / 100);
+    const w = getW(z_inc);
     state.accounts.User_A[asset] += w;
-    state.z += (z / 8);
+    state.z += (z_inc / 10);
     updateUI();
+}
+
+function doRecalibrate() {
+    const target = document.getElementById('adj-target').value;
+    const flux = parseFloat(document.getElementById('adj-flux').value);
+    if(state.accounts.User_A[target] >= flux) {
+        state.accounts.User_A[target] -= flux;
+        state.accounts.System[target] += flux;
+        state.z += (flux / 5000);
+        updateUI();
+    }
 }
 
 function doTransform() {
     const input = document.getElementById('engine-in');
     const msg = input.value; if(!msg) return;
-    const z = (msg.length/30);
-    const w = getW(z);
+    const z_inc = (msg.length / 40);
+    const w = getW(z_inc);
     const con = document.getElementById('console');
-    con.innerHTML += `<div>> [PROJECTION] ${msg} <span style="color:var(--accent)">[w:${w.toFixed(2)}]</span></div>`;
+    con.innerHTML += `<div>> [CALIBRATION] ${msg} <span style="color:var(--accent)">[w:${w.toFixed(2)}]</span></div>`;
     input.value = '';
-    state.z += z;
+    state.z += z_inc;
     updateUI();
     con.scrollTop = con.scrollHeight;
 }
@@ -227,10 +219,13 @@ function showPane(id) {
     document.getElementById('tab-' + id).classList.add('active');
 }
 
-function fullReset() { if(confirm("Full Reset?")) { localStorage.clear(); location.reload(); } }
+function fullReset() { if(confirm("Reset All?")) { localStorage.clear(); location.reload(); } }
 
 document.addEventListener('DOMContentLoaded', () => {
-    ASSETS.forEach(a => document.getElementById('syn-asset').add(new Option(a, a)));
+    ASSETS.forEach(a => {
+        document.getElementById('syn-asset').add(new Option(a, a));
+        document.getElementById('adj-target').add(new Option(a, a));
+    });
     document.getElementById('lang-policy').value = state.lang;
     updateUI();
 });
