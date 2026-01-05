@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MSGAI - Sovereign V40.0</title>
+<title>MSGAI - Sovereign V42.0</title>
 <style>
 :root { --ratio: 1.618; --accent: #007bff; --bg: #0b0e11; --surface: #15191d; --text: #e9ecef; }
 body { font-family: 'Inter', sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
@@ -33,89 +33,108 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
 </head>
 <body>
 <header>
-    <div class="brand">MSGAI LIBRARY V40.0</div>
+    <div class="brand" id="sys-brand">MSGAI V42.0</div>
     <select id="lang-policy" onchange="changeLang()" style="width:auto; margin:0; font-size:0.7rem;">
-        <option value="en">English (System)</option><option value="jp">日本語 (Logos)</option>
-        <option value="zh">简体中文</option><option value="ko">한국어</option>
+        <option value="en">English</option>
+        <option value="jp">日本語</option>
     </select>
 </header>
-<nav>
-    <button class="tab active" id="tab-board" onclick="showPane('board')">BOARD (板)</button>
-    <button class="tab" id="tab-window" onclick="showPane('window')">WINDOW (窓)</button>
-    <button class="tab" id="tab-table" onclick="showPane('table')">TABLE (台)</button>
-    <button class="tab" id="tab-book" onclick="showPane('book')">BOOK (本)</button>
-    <button class="tab" id="tab-monitor" onclick="showPane('monitor')">MONITOR (律)</button>
+<nav id="main-nav">
+    <button class="tab active" id="tab-board" onclick="showPane('board')">BOARD</button>
+    <button class="tab" id="tab-window" onclick="showPane('window')">WINDOW</button>
+    <button class="tab" id="tab-table" onclick="showPane('table')">TABLE</button>
+    <button class="tab" id="tab-book" onclick="showPane('book')">BOOK</button>
+    <button class="tab" id="tab-screen" onclick="showPane('screen')">SCREEN</button>
 </nav>
 <main id="viewport">
     <section id="board" class="pane active">
-        <div class="card"><div class="card-title" data-key="title_board">Current Board</div><div id="ledger-grid" class="grid"></div></div>
+        <div class="card"><div class="card-title" data-key="title_board">BOARD</div><div id="ledger-grid" class="grid"></div></div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
             <div class="card">
-                <div class="card-title" data-key="title_synth">Calibration</div>
+                <div class="card-title" data-key="title_synth">INPUT</div>
                 <div class="mode-selector">
                     <button class="mode-btn active" id="m-manual" onclick="setMode('manual')">DIRECT</button>
                     <button class="mode-btn" id="m-auto" onclick="setMode('auto')">RESONANT</button>
                     <button class="mode-btn" id="m-self" onclick="setMode('self')">EVO</button>
                 </div>
                 <select id="syn-asset"></select><input type="number" id="syn-amount" value="100">
-                <button class="btn btn-danger" data-key="btn_syn" onclick="doSynth()">WRITE TO BOARD</button>
+                <button class="btn btn-danger" data-key="btn_syn" onclick="doSynth()">EXECUTE</button>
             </div>
             <div class="card">
-                <div class="card-title" data-key="title_adj">Flux Recalibration</div>
-                <input type="text" id="adj-target" placeholder="Target Node..."><input type="number" id="adj-flux" value="50">
-                <button class="btn btn-primary" data-key="btn_adj" onclick="doRecalibrate()">APPLY FLUX</button>
+                <div class="card-title" data-key="title_panel">PANEL</div>
+                <input type="text" id="adj-target" placeholder="Target..."><input type="number" id="adj-flux" value="50">
+                <button class="btn btn-primary" data-key="btn_adj" onclick="doRecalibrate()">APPLY</button>
             </div>
         </div>
     </section>
 
     <section id="window" class="pane">
-        <div class="card"><div class="card-title" data-key="title_window">External Window</div><button class="btn btn-primary" data-key="btn_scan" onclick="startScan()">PEEK THROUGH WINDOW</button><div id="discovered-nodes" style="margin-top:10px;"></div></div>
+        <div class="card"><div class="card-title" data-key="title_window">WINDOW</div><button class="btn btn-primary" data-key="btn_scan" onclick="startScan()">SCAN</button><div id="discovered-nodes" style="margin-top:10px;"></div></div>
     </section>
 
     <section id="table" class="pane">
         <div class="card">
-            <div class="card-title" data-key="title_table">Logic Table</div>
-            <select id="proto-select"><option value="p-g">PROTOCOL G</option><option value="p-c">PROTOCOL C</option><option value="p-o">PROTOCOL O</option></select>
+            <div class="card-title" data-key="title_table">TABLE</div>
+            <select id="proto-select"><option value="p-g">P-G</option><option value="p-c">P-C</option><option value="p-o">P-O</option></select>
             <div id="console"></div>
-            <input type="text" id="engine-in" placeholder="Engine input..." onkeydown="if(event.key==='Enter') doInference()" style="margin-top:10px;">
+            <input type="text" id="engine-in" placeholder="..." onkeydown="if(event.key==='Enter') doInference()" style="margin-top:10px;">
         </div>
     </section>
 
     <section id="book" class="pane">
-        <div class="card"><div class="card-title" data-key="title_book">Chronicles (BOOK)</div><div id="book-content"></div></div>
+        <div class="card"><div class="card-title" data-key="title_book">BOOK</div><div id="book-content"></div></div>
     </section>
 
-    <section id="monitor" class="pane">
-        <div class="card"><div class="card-title" data-key="title_monitor">System Monitor</div><div class="grid"><div class="data-node"><div class="label" data-key="label_z">Tension (z)</div><div class="value" id="z-val">0</div></div><div class="data-node"><div class="label" data-key="label_w">Ratio (w)</div><div class="value" id="w-val">0</div></div></div></div>
-        <div class="card"><button class="btn btn-danger" onclick="fullReset()">Reset All Records</button></div>
+    <section id="screen" class="pane">
+        <div class="card">
+            <div class="card-title" data-key="title_screen">SCREEN</div>
+            <div class="grid">
+                <div class="data-node"><div class="label" data-key="label_z">z-value</div><div class="value" id="z-val">0</div></div>
+                <div class="data-node"><div class="label" data-key="label_w">w-value</div><div class="value" id="w-val">0</div></div>
+            </div>
+        </div>
+        <div class="card"><button class="btn btn-danger" onclick="fullReset()">RESET</button></div>
     </section>
 </main>
 <script>
 const ASSETS=["USD","JPY","EUR","BTC","ETH","MATIC"]; const PHI=1.618;
 const DICTIONARY={
-    en:{title_board:"Active Board",title_window:"External Window",title_table:"Logic Table",title_book:"Chronicles (BOOK)",btn_syn:"WRITE TO BOARD",btn_adj:"APPLY FLUX",btn_scan:"PEEK THROUGH WINDOW",title_monitor:"System Monitor",label_z:"Tension (z)",label_w:"Ratio (w)"},
-    jp:{title_board:"因果の盤 (Board)",title_window:"観測の窓 (Window)",title_table:"理の台 (Table)",title_book:"因果の書 (Book)",btn_syn:"盤に刻む",btn_adj:"転送実行",btn_scan:"窓から外部を観測",title_monitor:"理の観測",label_z:"緊張度 (z)",label_w:"調和比 (w)"}
+    en:{nav_board:"BOARD",nav_window:"WINDOW",nav_table:"TABLE",nav_book:"BOOK",nav_screen:"SCREEN",title_board:"Active Board",title_synth:"Input",title_panel:"Panel",title_window:"External Window",title_table:"Logic Table",title_book:"Chronicles",title_screen:"Status Screen",btn_syn:"EXECUTE",btn_adj:"APPLY",btn_scan:"SCAN",label_z:"z-value",label_w:"w-value"},
+    jp:{nav_board:"BOARD (板)",nav_window:"WINDOW (窓)",nav_table:"TABLE (台)",nav_book:"BOOK (本)",nav_screen:"SCREEN (幕)",title_board:"因果の盤",title_synth:"現出",title_panel:"操作パネル",title_window:"観測の窓",title_table:"理の台",title_book:"因果の書",title_screen:"理の幕",btn_syn:"盤に刻む",btn_adj:"転送実行",btn_scan:"窓から観測",label_z:"緊張度 (z)",label_w:"調和比 (w)"}
 };
-let state = JSON.parse(localStorage.getItem('msgai_v40_core')) || { z: 0.05, accounts: { User_A: Object.fromEntries(ASSETS.map(a => [a, 0])) }, lang: 'en', mode: 'manual', logs: [] };
+let state = JSON.parse(localStorage.getItem('msgai_v42_core')) || { z: 0.05, accounts: { User_A: Object.fromEntries(ASSETS.map(a => [a, 0])) }, lang: 'en', mode: 'manual', logs: [] };
 
 function updateUI(){
     const d = DICTIONARY[state.lang] || DICTIONARY.en;
     document.querySelectorAll('[data-key]').forEach(el => { const k=el.getAttribute('data-key'); if(d[k]) el.textContent=d[k]; });
+    if(state.lang === 'jp'){
+        document.getElementById('tab-board').textContent = d.nav_board;
+        document.getElementById('tab-window').textContent = d.nav_window;
+        document.getElementById('tab-table').textContent = d.nav_table;
+        document.getElementById('tab-book').textContent = d.nav_book;
+        document.getElementById('tab-screen').textContent = d.nav_screen;
+    } else {
+        document.getElementById('tab-board').textContent = "BOARD";
+        document.getElementById('tab-window').textContent = "WINDOW";
+        document.getElementById('tab-table').textContent = "TABLE";
+        document.getElementById('tab-book').textContent = "BOOK";
+        document.getElementById('tab-screen').textContent = "SCREEN";
+    }
     document.getElementById('z-val').textContent = state.z.toFixed(6);
     document.getElementById('w-val').textContent = (PHI/(state.z||0.001)).toFixed(2);
     document.getElementById('ledger-grid').innerHTML = ASSETS.map(a => `<div class="data-node"><div class="label">${a}</div><div class="value">${(state.accounts.User_A[a]||0).toFixed(4)}</div></div>`).join('');
     document.getElementById('book-content').innerHTML = state.logs.map(l => `<p><i>[${l.t}]</i> ${l.m}</p>`).reverse().join('');
-    localStorage.setItem('msgai_v40_core', JSON.stringify(state));
+    localStorage.setItem('msgai_v42_core', JSON.stringify(state));
 }
 function addLog(msg){ state.logs.push({t: new Date().toLocaleTimeString(), m: msg}); if(state.logs.length>100) state.logs.shift(); updateUI(); }
-function setMode(m){ state.mode = m; document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active')); document.getElementById('m-'+m).classList.add('active'); addLog(`The mode of causality has shifted to ${m.toUpperCase()}.`); }
+function setMode(m){ state.mode = m; document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active')); document.getElementById('m-'+m).classList.add('active'); addLog(`Mode: ${m.toUpperCase()}`); }
 function showPane(id){ document.querySelectorAll('.pane, .tab').forEach(el=>el.classList.remove('active')); document.getElementById(id).classList.add('active'); document.getElementById('tab-'+id).classList.add('active'); }
 function changeLang(){ state.lang = document.getElementById('lang-policy').value; updateUI(); }
-function doSynth(){ const a=document.getElementById('syn-asset').value; const amt=parseFloat(document.getElementById('syn-amount').value); state.accounts.User_A[a]+=(amt/100)*PHI; state.z+=(amt/5000); addLog(`New value emerged on the board: ${amt} ${a}.`); updateUI(); }
-function doRecalibrate(){ addLog(`A flux flow was applied toward the target node.`); alert("Applied."); }
-function startScan(){ addLog("Gazing through the window... Seeking external causality."); setTimeout(()=>{ addLog("A distant node (0x1F) has been sighted."); }, 1000); }
-function doInference(){ const input=document.getElementById('engine-in').value; if(!input)return; document.getElementById('console').innerHTML+=`<div>> ${input}</div>`; addLog("The logic table was used to refine a thought."); document.getElementById('engine-in').value=''; }
-function fullReset(){ if(confirm("Clear the Library?")){ localStorage.clear(); location.reload(); } }
+function doSynth(){ const a=document.getElementById('syn-asset').value; const amt=parseFloat(document.getElementById('syn-amount').value); state.accounts.User_A[a]+=(amt/100)*PHI; state.z+=(amt/5000); addLog(`Action recorded: ${amt} ${a} processed.`); updateUI(); }
+function doRecalibrate(){ addLog(`Panel operation: flux applied.`); alert("Applied."); }
+function startScan(){ addLog("Window: scanning..."); setTimeout(()=>{ addLog("External node sighting."); }, 1000); }
+function doInference(){ const input=document.getElementById('engine-in').value; if(!input)return; document.getElementById('console').innerHTML+=`<div>> ${input}</div>`; addLog("Table processing complete."); document.getElementById('engine-in').value=''; }
+function fullReset(){ if(confirm("Reset?")){ localStorage.clear(); location.reload(); } }
 document.addEventListener('DOMContentLoaded', () => { ASSETS.forEach(a => document.getElementById('syn-asset').add(new Option(a, a))); updateUI(); });
 </script>
 </body>
