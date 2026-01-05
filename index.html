@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MSGAI - Sovereign V36.4 φ完遂版</title>
+<title>MSGAI - Sovereign V36.5 φ確定版</title>
 <style>
 :root{--accent:#007bff;--bg:#f4f7f9;--card-bg:#fff;--nav-bg:#000;--phi:1.618;--danger:#e03131;}
 body{font-family:'Segoe UI',sans-serif;margin:0;background:var(--bg);color:#1a1a1a;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
@@ -52,13 +52,10 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e0;border-radius:8px;
 <main id="viewport">
     <section id="currency" class="tab-pane active">
         <div class="card">
-            <h2>口座</h2>
+            <h2>口座状況</h2>
             <div id="bal_list" class="status-grid"></div>
-            <div class="history-box">
-                <div class="history-header"><span class="history-title">最近の移動履歴</span><a class="view-all-link" onclick="showFullHist('tx')">全履歴表示</a></div>
-                <table class="history-table" id="tx_hist_short"></table>
-            </div>
         </div>
+
         <div class="card">
             <h2>真理生成 (Mint)</h2>
             <div class="input-box"><label>対象通貨</label><select id="m_cur"></select></div>
@@ -69,12 +66,17 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e0;border-radius:8px;
                 <table class="history-table" id="mint_hist_short"></table>
             </div>
         </div>
+
         <div class="card">
             <h2>補正移動 (Transfer)</h2>
             <div class="input-box"><label>移動先</label><input type="text" id="rx_in" value="User_B"></div>
             <div class="input-box"><label>対象通貨</label><select id="tx_cur"></select></div>
             <input type="number" id="amt_in" value="10">
             <button class="action-btn btn-blue" style="margin-top:10px" onclick="runTx()">移動実行</button>
+            <div class="history-box">
+                <div class="history-header"><span class="history-title">最近の移動履歴</span><a class="view-all-link" onclick="showFullHist('tx')">全履歴表示</a></div>
+                <table class="history-table" id="tx_hist_short"></table>
+            </div>
         </div>
     </section>
 
@@ -103,7 +105,7 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e0;border-radius:8px;
             <h2>初期化・浄化命令</h2>
             <button class="action-btn btn-danger" onclick="resetPart('accounts')">口座残高のリセット</button>
             <button class="action-btn btn-danger" onclick="resetPart('hist')">全履歴の消去</button>
-            <button class="action-btn btn-danger" style="border: 2px solid #000;" onclick="resetSystem()">システム全体の初期化（全リセット）</button>
+            <button class="action-btn btn-danger" style="border: 2px solid #000;" onclick="resetSystem()">システム全体の初期化</button>
         </div>
 
         <div class="card" id="logos-monitor" style="background:#000; color:#fff; border:2px solid var(--accent);">
@@ -134,7 +136,7 @@ const initialState = () => ({
     hist: { mint: [], tx: [], ai: [] }
 });
 
-let state = JSON.parse(localStorage.getItem('msgai_v36_sovereign')) || initialState();
+let state = JSON.parse(localStorage.getItem('msgai_v36_final_sovereign')) || initialState();
 
 const MSGAI_z = v => typeof v==="string" ? (v.length/50)+(new Set(v).size/20) : v/100;
 const MSGAI_w = z => phi/(z||0.000001);
@@ -152,27 +154,15 @@ function update(){
 
     document.getElementById('chaos_val').textContent = (state.tension * 100).toFixed(2) + "%";
     document.getElementById('purity_val').textContent = Math.min((w/(phi*10))*100, 100).toFixed(2) + "%";
-    
-    localStorage.setItem('msgai_v36_sovereign', JSON.stringify(state));
+    localStorage.setItem('msgai_v36_final_sovereign', JSON.stringify(state));
 }
 
-// 初期化命令
 function resetSystem(){
-    if(confirm("システム全体を初期化し、0（原点）に戻します。よろしいですか？")){
-        state = initialState();
-        document.getElementById('ai-log').innerHTML = "";
-        update();
-        alert("システムは浄化され、原点に回帰しました。");
-    }
+    if(confirm("全リセット実行？")){ state = initialState(); document.getElementById('ai-log').innerHTML = ""; update(); }
 }
 
 function resetPart(part){
-    if(confirm(`${part} を初期化しますか？`)){
-        const fresh = initialState();
-        state[part] = fresh[part];
-        if(part==='hist') document.getElementById('ai-log').innerHTML = "";
-        update();
-    }
+    if(confirm(`${part} をリセット？`)){ state[part] = initialState()[part]; if(part==='hist') document.getElementById('ai-log').innerHTML = ""; update(); }
 }
 
 function runMint(){
@@ -187,8 +177,11 @@ function runTx(){
     const c=document.getElementById('tx_cur').value, a=parseFloat(document.getElementById('amt_in').value), r=document.getElementById('rx_in').value;
     const z=MSGAI_z(c+a), w=MSGAI_w(z);
     if(state.accounts.User_A[c]>=w){
-        state.accounts.User_A[c]-=w; state.tension+=(z/5);
-        state.hist.tx.push({time:new Date().toLocaleTimeString(), desc:`送金:${r}`, amt:w.toFixed(4)});
+        state.accounts.User_A[c]-=w;
+        if(!state.accounts[r]) state.accounts[r] = Object.fromEntries(curs.map(cur => [cur, 0]));
+        state.accounts[r][c] = (state.accounts[r][c] || 0) + w;
+        state.tension+=(z/5);
+        state.hist.tx.push({time:new Date().toLocaleTimeString(), desc:`送金:${r}(${c})`, amt:w.toFixed(4)});
         update();
     } else { alert("調和不足"); }
 }
@@ -196,7 +189,7 @@ function runTx(){
 async function talk(){
     const msg=document.getElementById('ai-in').value; if(!msg) return;
     const z=MSGAI_z(msg), w=MSGAI_w(z);
-    document.getElementById('ai-log').innerHTML += `<div>> ${msg} <span style="color:var(--accent); font-size:0.8em;">(w:${w.toFixed(4)})</span></div>`;
+    document.getElementById('ai-log').innerHTML += `<div>> ${msg} <span style="color:var(--accent); font-size:0.7em;">(w:${w.toFixed(4)})</span></div>`;
     document.getElementById('ai-in').value='';
     state.hist.ai.push({time:new Date().toLocaleTimeString(), desc:msg.substring(0,15), amt:w.toFixed(4)});
     state.tension += z; update();
