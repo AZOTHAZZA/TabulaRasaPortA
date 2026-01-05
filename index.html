@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MSGAI - Sovereign V36.3 φ真・完全版</title>
+<title>MSGAI - Sovereign V36.4 φ完遂版</title>
 <style>
-:root{--accent:#007bff;--bg:#f4f7f9;--card-bg:#fff;--nav-bg:#000;--phi:1.618;}
+:root{--accent:#007bff;--bg:#f4f7f9;--card-bg:#fff;--nav-bg:#000;--phi:1.618;--danger:#e03131;}
 body{font-family:'Segoe UI',sans-serif;margin:0;background:var(--bg);color:#1a1a1a;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
 header{background:var(--nav-bg);color:#fff;flex-shrink:0;border-bottom: 2px solid var(--accent);}
 .header-top{display:flex;justify-content:center;padding:25px 0;}
@@ -24,16 +24,16 @@ h2{margin:0 0 15px 0;font-size:1.1em;border-left:5px solid var(--accent);padding
 .input-box{margin-bottom:12px;}
 label{font-size:0.7em;font-weight:bold;color:#718096;display:block;margin-bottom:4px;}
 input,select{width:100%;padding:12px;border:1px solid #cbd5e0;border-radius:8px;font-size:16px;box-sizing:border-box;}
-.action-btn{width:100%;padding:16px;border:none;border-radius:12px;color:#fff;font-weight:bold;font-size:1.1em;cursor:pointer;}
+.action-btn{width:100%;padding:16px;border:none;border-radius:12px;color:#fff;font-weight:bold;font-size:1.1em;cursor:pointer;margin-bottom:10px;}
 .btn-orange{background:#fd7e14;}
 .btn-blue{background:var(--accent);}
+.btn-danger{background:var(--danger);}
 .history-box{margin-top:15px;border-top:1px solid #eee;padding-top:10px;}
 .history-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
 .history-title{font-size:0.8em;font-weight:bold;color:#718096;}
 .view-all-link{font-size:0.75em;color:var(--accent);text-decoration:none;cursor:pointer;font-weight:bold;}
 .history-table{width:100%;font-size:0.75em;border-collapse:collapse;}
 .history-table td{padding:6px 0;border-bottom:1px solid #f8f9fa;}
-/* モーダルスタイル */
 #modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:1000;justify-content:center;align-items:center;backdrop-filter:blur(5px);}
 .modal-content{background:#fff;width:90%;max-width:600px;max-height:80vh;border-radius:20px;padding:25px;overflow-y:auto;}
 </style>
@@ -59,7 +59,6 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e0;border-radius:8px;
                 <table class="history-table" id="tx_hist_short"></table>
             </div>
         </div>
-
         <div class="card">
             <h2>真理生成 (Mint)</h2>
             <div class="input-box"><label>対象通貨</label><select id="m_cur"></select></div>
@@ -70,7 +69,6 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e0;border-radius:8px;
                 <table class="history-table" id="mint_hist_short"></table>
             </div>
         </div>
-
         <div class="card">
             <h2>補正移動 (Transfer)</h2>
             <div class="input-box"><label>移動先</label><input type="text" id="rx_in" value="User_B"></div>
@@ -100,6 +98,14 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e0;border-radius:8px;
                 <div class="metric"><div>Ratio (w)</div><div class="metric-value" id="w_val">32.36</div></div>
             </div>
         </div>
+        
+        <div class="card">
+            <h2>初期化・浄化命令</h2>
+            <button class="action-btn btn-danger" onclick="resetPart('accounts')">口座残高のリセット</button>
+            <button class="action-btn btn-danger" onclick="resetPart('hist')">全履歴の消去</button>
+            <button class="action-btn btn-danger" style="border: 2px solid #000;" onclick="resetSystem()">システム全体の初期化（全リセット）</button>
+        </div>
+
         <div class="card" id="logos-monitor" style="background:#000; color:#fff; border:2px solid var(--accent);">
             <h2>ロゴス監視モニター <span id="alert-pulse" style="width:12px;height:12px;background:#28a745;border-radius:50%;display:inline-block;"></span></h2>
             <div class="status-grid" style="color:#000; margin-top:10px;">
@@ -122,10 +128,13 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e0;border-radius:8px;
 <script>
 const curs = ["USD","JPY","EUR","BTC","ETH","MATIC"];
 const phi = 1.6180339887;
-let state = JSON.parse(localStorage.getItem('msgai_v36_final')) || {
-    tension:0.05, accounts:{User_A:{},User_B:{}}, hist:{mint:[], tx:[], ai:[]}
-};
-curs.forEach(c=>{ if(!state.accounts.User_A[c]) state.accounts.User_A[c]=0; if(!state.accounts.User_B[c]) state.accounts.User_B[c]=0; });
+const initialState = () => ({
+    tension: 0.05,
+    accounts: { User_A: Object.fromEntries(curs.map(c => [c, 0])), User_B: Object.fromEntries(curs.map(c => [c, 0])) },
+    hist: { mint: [], tx: [], ai: [] }
+});
+
+let state = JSON.parse(localStorage.getItem('msgai_v36_sovereign')) || initialState();
 
 const MSGAI_z = v => typeof v==="string" ? (v.length/50)+(new Set(v).size/20) : v/100;
 const MSGAI_w = z => phi/(z||0.000001);
@@ -136,17 +145,34 @@ function update(){
     document.getElementById('w_val').textContent = w.toFixed(2);
     document.getElementById('bal_list').innerHTML = curs.map(c=>`<div class="metric"><div>${c}</div><div class="metric-value">${(state.accounts.User_A[c]||0).toFixed(4)}</div></div>`).join('');
     
-    // 短縮履歴の更新
     ['mint','tx','ai'].forEach(t=>{
         const el = document.getElementById(t+'_hist_short');
         if(el) el.innerHTML = state.hist[t].slice(-5).reverse().map(h=>`<tr><td>${h.time}</td><td>${h.desc}</td><td style="text-align:right;">φ:${h.amt}</td></tr>`).join('');
     });
 
-    // モニター更新
     document.getElementById('chaos_val').textContent = (state.tension * 100).toFixed(2) + "%";
     document.getElementById('purity_val').textContent = Math.min((w/(phi*10))*100, 100).toFixed(2) + "%";
     
-    localStorage.setItem('msgai_v36_final', JSON.stringify(state));
+    localStorage.setItem('msgai_v36_sovereign', JSON.stringify(state));
+}
+
+// 初期化命令
+function resetSystem(){
+    if(confirm("システム全体を初期化し、0（原点）に戻します。よろしいですか？")){
+        state = initialState();
+        document.getElementById('ai-log').innerHTML = "";
+        update();
+        alert("システムは浄化され、原点に回帰しました。");
+    }
+}
+
+function resetPart(part){
+    if(confirm(`${part} を初期化しますか？`)){
+        const fresh = initialState();
+        state[part] = fresh[part];
+        if(part==='hist') document.getElementById('ai-log').innerHTML = "";
+        update();
+    }
 }
 
 function runMint(){
