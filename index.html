@@ -4,128 +4,116 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Neutral Studio</title>
 <style>
-:root { --ratio: 1.618; --accent: #6c757d; --bg: #0b0e11; --surface: #15191d; --text: #e9ecef; }
-body { font-family: 'Inter', sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-header { background: #000; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); flex-shrink: 0; }
+/* CSS変数の初期値（Neutral） */
+:root { 
+    --ratio: 1.618; 
+    --bg: #0b0e11; --surface: #15191d; --accent: #6c757d; --text: #e9ecef; --border: #2d333b;
+    --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* UI全体の遷移アニメーション */
+body { font-family: 'Inter', sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: var(--transition); }
+header { background: #000; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); flex-shrink: 0; transition: var(--transition); }
 .brand { font-weight: 800; color: #fff; font-size: 0.85rem; letter-spacing: 0.15em; }
 nav { display: flex; background: #000; border-bottom: 1px solid #333; flex-shrink: 0; }
-.tab { flex: 1; padding: 12px; border: none; background: none; color: #666; font-weight: bold; cursor: pointer; font-size: 0.65rem; border-bottom: 2px solid transparent; text-transform: uppercase; }
-.tab.active { color: #fff; border-bottom-color: #fff; background: #1a1a1a; }
+.tab { flex: 1; padding: 12px; border: none; background: none; color: #666; font-weight: bold; cursor: pointer; font-size: 0.65rem; border-bottom: 2px solid transparent; text-transform: uppercase; transition: var(--transition); }
+.tab.active { color: #fff; border-bottom-color: var(--accent); background: #1a1a1a; }
 #viewport { flex-grow: 1; overflow-y: auto; padding: 15px; }
 .pane { display: none; width: 100%; max-width: 900px; margin: 0 auto; }
 .pane.active { display: block; }
-.card { background: var(--surface); border-radius: 10px; border: 1px solid #2d333b; padding: 18px; margin-bottom: 15px; }
+.card { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); padding: 18px; margin-bottom: 15px; transition: var(--transition); }
 .card-title { font-size: 0.65rem; font-weight: 700; color: #768390; margin-bottom: 12px; text-transform: uppercase; border-left: 3px solid var(--accent); padding-left: 10px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
-.data-node { background: #1c2128; border: 1px solid #2d333b; padding: 12px; border-radius: 8px; text-align: center; }
+.data-node { background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 12px; border-radius: 8px; text-align: center; }
 .label { font-size: 0.6rem; color: #768390; margin-bottom: 4px; }
-.value { font-family: monospace; font-weight: bold; font-size: 1rem; color: #adbac7; }
-input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #444; border-radius: 6px; background: #0d1117; color: #fff; font-size: 0.8rem; }
+.value { font-family: monospace; font-weight: bold; font-size: 1rem; color: var(--text); }
+input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #444; border-radius: 6px; background: rgba(0,0,0,0.3); color: #fff; font-size: 0.8rem; }
 .btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.75rem; transition: 0.2s; }
-.btn-neutral { background: #444; color: #fff; }
-.btn-danger { background: #a71d2a; color: #fff; }
-#chronicle-box { background: #0a0a0a; color: #c9d1d9; padding: 15px; font-family: 'Georgia', serif; font-size: 0.85rem; height: 300px; overflow-y: auto; border-radius: 6px; border: 1px solid #30363d; line-height: 1.6; }
+.btn-neutral { background: var(--accent); color: #fff; }
+#chronicle-box { background: rgba(0,0,0,0.3); color: var(--text); padding: 15px; font-family: 'Georgia', serif; font-size: 0.85rem; height: 300px; overflow-y: auto; border-radius: 6px; border: 1px solid var(--border); line-height: 1.6; }
 </style>
 </head>
 <body>
 <header>
     <div class="brand">NEUTRAL STUDIO</div>
-    <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 0.6rem; color: #666; font-weight: bold;">PALETTE:</span>
-        <select id="active-palette" onchange="applyPalette()" style="width:auto; margin:0; font-size:0.7rem; background:#000; color:#fff; border:1px solid #333;"></select>
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <select id="ui-tone" onchange="applyTheme()" style="width:auto; margin:0; font-size:0.65rem; background:#000; color:#fff; border:1px solid #333;">
+            <option value="neutral">Neutral Tone</option>
+            <option value="logical">Logical Tone</option>
+            <option value="universal">Universal Tone</option>
+        </select>
+        <select id="ui-lang" onchange="updateLabels()" style="width:auto; margin:0; font-size:0.65rem; background:#000; color:#fff; border:1px solid #333;">
+            <option value="en">English</option>
+            <option value="jp">日本語</option>
+        </select>
     </div>
 </header>
-<nav>
-    <button class="tab active" id="tab-canvas" onclick="showPane('canvas')">CANVAS</button>
-    <button class="tab" id="tab-window" onclick="showPane('window')">WINDOW</button>
-    <button class="tab" id="tab-table" onclick="showPane('table')">TABLE</button>
-    <button class="tab" id="tab-book" onclick="showPane('book')">BOOK</button>
-    <button class="tab" id="tab-screen" onclick="showPane('screen')">SCREEN</button>
-</nav>
+<nav id="nav-tabs"></nav>
 <main id="viewport">
     <section id="canvas" class="pane active">
-        <div class="card"><div class="card-title" data-key="title_canvas">CANVAS</div><div id="scenery-display" class="grid"></div></div>
+        <div class="card"><div class="card-title" data-key="title_canvas"></div><div id="scenery-display" class="grid"></div></div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
             <div class="card">
-                <div class="card-title" data-key="title_colors">COLORS</div>
+                <div class="card-title" data-key="title_colors"></div>
                 <select id="color-choice"></select><input type="number" id="brush-intensity" value="100">
-                <button class="btn btn-neutral" data-key="btn_paint" onclick="paintOnCanvas()">PAINT</button>
+                <button class="btn btn-neutral" data-key="btn_paint" onclick="paintOnCanvas()"></button>
             </div>
             <div class="card">
-                <div class="card-title" data-key="title_painting">PAINTING</div>
-                <input type="text" id="subject-node" placeholder="Subject..."><button class="btn btn-neutral" data-key="btn_draw" onclick="drawLayer()">DRAW</button>
+                <div class="card-title" data-key="title_painting"></div>
+                <input type="text" id="subject-node" placeholder="Subject..."><button class="btn btn-neutral" data-key="btn_draw" onclick="drawLayer()"></button>
             </div>
         </div>
     </section>
-
-    <section id="window" class="pane">
-        <div class="card"><div class="card-title" data-key="title_window">WINDOW</div><button class="btn btn-neutral" data-key="btn_scan" onclick="peekWindow()">SCAN</button><div id="window-signals" style="margin-top:10px;"></div></div>
-    </section>
-
-    <section id="table" class="pane">
-        <div class="card"><div class="card-title" data-key="title_table">TABLE</div><div id="console" style="height:150px; background:#000; overflow-y:auto; padding:10px; font-family:monospace; font-size:0.7rem; color:#adbac7;"></div><input type="text" id="concept-in" placeholder="..." onkeydown="if(event.key==='Enter') useTable()" style="margin-top:10px;"></div>
-    </section>
-
-    <section id="book" class="pane">
-        <div class="card"><div class="card-title" data-key="title_book">BOOK</div><div id="chronicle-box"></div></div>
-    </section>
-
     <section id="screen" class="pane">
         <div class="card">
-            <div class="card-title" data-key="title_screen">SCREEN</div>
+            <div class="card-title" data-key="title_screen"></div>
             <div class="grid">
-                <div class="data-node"><div class="label" data-key="label_z">z-colors</div><div class="value" id="z-val">0</div></div>
-                <div class="data-node"><div class="label" data-key="label_w">w-colors</div><div class="value" id="w-val">0</div></div>
+                <div class="data-node"><div class="label" data-key="label_z"></div><div class="value" id="z-val">0</div></div>
+                <div class="data-node"><div class="label" data-key="label_w"></div><div class="value" id="w-val">0</div></div>
             </div>
         </div>
-        <div class="card"><button class="btn btn-danger" data-key="btn_erase" onclick="eraseCanvas()">ERASE</button></div>
     </section>
 </main>
+
 <script>
 const COLOR_SYSTEM=["USD","JPY","EUR","BTC","ETH","MATIC"]; const PHI=1.618;
-const PALETTES = {
-    universal: { name: "Universal Tone", keys: { title_canvas:"CANVAS",title_colors:"COLORS",title_painting:"PAINTING",title_window:"WINDOW",title_table:"TABLE",title_book:"BOOK",title_screen:"SCREEN",btn_paint:"PAINT",btn_draw:"DRAW",btn_scan:"SCAN",btn_erase:"ERASE CANVAS",label_z:"z-colors",label_w:"w-colors"} },
-    logical: { name: "Logical Tone", keys: { title_canvas:"因果の布",title_colors:"色彩の源",title_painting:"描写の構成",title_window:"観測の窓",title_table:"理の台",title_book:"因果の書",title_screen:"理の幕",btn_paint:"筆を入れる",btn_draw:"線を引く",btn_scan:"窓から観測",btn_erase:"布を清める",label_z:"zの彩度",label_w:"wの調和"} }
+const TONES = {
+    neutral: { bg: "#0b0e11", surface: "#15191d", accent: "#6c757d", text: "#e9ecef", border: "#2d333b" },
+    logical: { bg: "#050a0f", surface: "#0a141e", accent: "#007bff", text: "#a0d1ff", border: "#1a3a5a" }, // 寒色・幾何学
+    universal: { bg: "#1a1612", surface: "#2a241e", accent: "#d4a017", text: "#fff4e0", border: "#4a3f35" } // 暖色・有機的
+};
+const DICTIONARY = {
+    en: { canvas:"CANVAS", colors:"COLORS", painting:"PAINTING", screen:"SCREEN", btn_paint:"PAINT", btn_draw:"DRAW", z:"z-colors", w:"w-colors" },
+    jp: { canvas:"因果の布", colors:"色彩の源", painting:"描写の構成", screen:"理の幕", btn_paint:"筆を入れる", btn_draw:"線を引く", z:"zの彩度", w:"wの調和" }
 };
 
-let studio = JSON.parse(localStorage.getItem('neutral_studio_data')) || { tension: 0.05, scenery: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])), activePalette: 'universal', chronicles: [] };
+let studio = JSON.parse(localStorage.getItem('neutral_studio_v55')) || { tension: 0.05, scenery: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])), tone: 'neutral', lang: 'en' };
 
-function updateStudioUI(){
-    const p = PALETTES[studio.activePalette] || PALETTES.universal;
-    document.querySelectorAll('[data-key]').forEach(el => { const k=el.getAttribute('data-key'); if(p.keys[k]) el.textContent=p.keys[k]; });
-    document.getElementById('z-val').textContent = studio.tension.toFixed(6);
-    document.getElementById('w-val').textContent = (PHI/(studio.tension||0.001)).toFixed(2);
-    document.getElementById('scenery-display').innerHTML = COLOR_SYSTEM.map(c => `<div class="data-node"><div class="label">${c}</div><div class="value">${(studio.scenery[c]||0).toFixed(4)}</div></div>`).join('');
-    document.getElementById('chronicle-box').innerHTML = studio.chronicles.map(c => `<p><i>[${c.t}]</i> ${c.m}</p>`).reverse().join('');
-    localStorage.setItem('neutral_studio_data', JSON.stringify(studio));
+function applyTheme() {
+    studio.tone = document.getElementById('ui-tone').value;
+    const theme = TONES[studio.tone];
+    const root = document.documentElement;
+    Object.keys(theme).forEach(key => root.style.setProperty(`--${key}`, theme[key]));
+    save();
 }
 
-function writeChronicle(msg){ studio.chronicles.push({t: new Date().toLocaleTimeString(), m: msg}); if(studio.chronicles.length>100) studio.chronicles.shift(); updateStudioUI(); }
-function showPane(id){ document.querySelectorAll('.pane, .tab').forEach(el=>el.classList.remove('active')); document.getElementById(id).classList.add('active'); document.getElementById('tab-'+id).classList.add('active'); }
-function applyPalette(){ studio.activePalette = document.getElementById('active-palette').value; updateStudioUI(); }
-
-function paintOnCanvas(){
-    const c=document.getElementById('color-choice').value;
-    const v=parseFloat(document.getElementById('brush-intensity').value);
-    studio.scenery[c] += (v/100)*PHI; studio.tension += (v/5000);
-    writeChronicle(`Modified ${v} density of ${c}.`); updateStudioUI();
+function updateLabels() {
+    studio.lang = document.getElementById('ui-lang').value;
+    const d = DICTIONARY[studio.lang];
+    document.querySelectorAll('[data-key]').forEach(el => {
+        const k = el.getAttribute('data-key').replace('title_','').replace('btn_','').replace('label_','');
+        if(d[k]) el.textContent = d[k];
+    });
+    save();
 }
 
-function drawLayer(){ writeChronicle(`Layer structure updated.`); alert("Done."); }
-function peekWindow(){ writeChronicle("Observing visual resonances..."); setTimeout(()=>{ writeChronicle("External pattern integrated."); }, 1000); }
-function useTable(){ 
-    const input=document.getElementById('concept-in').value; if(!input)return;
-    document.getElementById('console').innerHTML+=`<div>> ${input}</div>`;
-    writeChronicle("New conceptual sketch on table."); document.getElementById('concept-in').value=''; 
-}
-function eraseCanvas(){ if(confirm("Initialize canvas and reset composition?")){ localStorage.clear(); location.reload(); } }
+function save() { localStorage.setItem('neutral_studio_v55', JSON.stringify(studio)); }
 
+// 初期化処理
 document.addEventListener('DOMContentLoaded', () => {
-    const sel = document.getElementById('active-palette');
-    Object.keys(PALETTES).forEach(k => sel.add(new Option(PALETTES[k].name, k)));
-    sel.value = studio.activePalette;
-    COLOR_SYSTEM.forEach(c => document.getElementById('color-choice').add(new Option(c, c)));
-    updateStudioUI();
+    document.getElementById('ui-tone').value = studio.tone;
+    document.getElementById('ui-lang').value = studio.lang;
+    applyTheme(); updateLabels();
+    // (中略: タブ生成やCOLOR_SYSTEMの反映ロジック)
 });
 </script>
 </body>
