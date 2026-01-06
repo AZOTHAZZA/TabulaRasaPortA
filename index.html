@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,13 +9,13 @@
     --bg: #0b0e11; --surface: #15191d; --accent: #6c757d; --text: #e9ecef; --border: #2d333b;
     --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
-body { font-family: 'Inter', 'Noto Sans JP', sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: var(--transition); }
+body { font-family: 'Inter', 'Noto Sans JP', sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 header { background: #000; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); flex-shrink: 0; }
 .brand-group { display: flex; flex-direction: column; }
 .super-title { font-size: 0.55rem; color: var(--accent); letter-spacing: 0.4em; font-weight: 300; line-height: 1; margin-bottom: 4px; }
 .brand { font-weight: 800; color: #fff; font-size: 0.85rem; letter-spacing: 0.15em; line-height: 1; }
 nav { display: flex; background: #000; border-bottom: 1px solid #333; flex-shrink: 0; }
-.tab { flex: 1; padding: 12px; border: none; background: none; color: #666; font-weight: bold; cursor: pointer; font-size: 0.65rem; border-bottom: 2px solid transparent; text-transform: uppercase; }
+.tab { flex: 1; padding: 12px; border: none; background: none; color: #666; font-weight: bold; cursor: pointer; font-size: 0.65rem; border-bottom: 2px solid transparent; text-transform: uppercase; outline: none; }
 .tab.active { color: #fff; border-bottom-color: var(--accent); background: #1a1a1a; }
 #viewport { flex-grow: 1; overflow-y: auto; padding: 15px; }
 .pane { display: none; width: 100%; max-width: 900px; margin: 0 auto; }
@@ -26,8 +26,8 @@ nav { display: flex; background: #000; border-bottom: 1px solid #333; flex-shrin
 .data-node { background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 12px; border-radius: 8px; text-align: center; }
 .label { font-size: 0.6rem; color: #768390; margin-bottom: 4px; }
 .value { font-family: monospace; font-weight: bold; font-size: 1rem; color: var(--text); }
-input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #444; border-radius: 6px; background: rgba(0,0,0,0.3); color: #fff; font-size: 0.8rem; }
-.btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.75rem; transition: 0.2s; }
+input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #444; border-radius: 6px; background: rgba(0,0,0,0.3); color: #fff; font-size: 0.8rem; outline: none; }
+.btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.75rem; transition: 0.2s; outline: none; }
 .btn-neutral { background: var(--accent); color: #fff; }
 .btn-danger { background: #a71d2a; color: #fff; }
 #console { background: #000; color: #adbac7; padding: 12px; font-family: monospace; font-size: 0.7rem; height: 150px; overflow-y: auto; border-radius: 6px; border: 1px solid var(--border); }
@@ -49,14 +49,14 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
     </div>
 </header>
 <nav id="main-nav">
-    <button class="tab active" id="tab-canvas" onclick="showPane('canvas')" data-key="tab_canvas"></button>
-    <button class="tab" id="tab-window" onclick="showPane('window')" data-key="tab_window"></button>
-    <button class="tab" id="tab-table" onclick="showPane('table')" data-key="tab_table"></button>
-    <button class="tab" id="tab-book" onclick="showPane('book')" data-key="tab_book"></button>
-    <button class="tab" id="tab-status" onclick="showPane('status')" data-key="tab_status"></button>
+    <button class="tab active" id="btn-canvas" onclick="showPane('canvas')" data-key="tab_canvas"></button>
+    <button class="tab" id="btn-window" onclick="showPane('window')" data-key="tab_window"></button>
+    <button class="tab" id="btn-table" onclick="showPane('table')" data-key="tab_table"></button>
+    <button class="tab" id="btn-book" onclick="showPane('book')" data-key="tab_book"></button>
+    <button class="tab" id="btn-status" onclick="showPane('status')" data-key="tab_status"></button>
 </nav>
 <main id="viewport">
-    <section id="canvas" class="pane active">
+    <section id="pane-canvas" class="pane active">
         <div class="card"><div class="card-title" data-key="title_canvas"></div><div class="grid" id="scenery-display"></div></div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
             <div class="card">
@@ -71,7 +71,7 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
         </div>
     </section>
 
-    <section id="window" class="pane">
+    <section id="pane-window" class="pane">
         <div class="card">
             <div class="card-title" data-key="title_window"></div>
             <p id="door-status" style="font-size:0.7rem; color:var(--accent); margin-bottom:15px; font-family:monospace;"></p>
@@ -79,15 +79,15 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
         </div>
     </section>
 
-    <section id="table" class="pane">
+    <section id="pane-table" class="pane">
         <div class="card"><div class="card-title" data-key="title_table"></div><div id="console"></div><input type="text" id="concept-in" placeholder="..." onkeydown="if(event.key==='Enter') useTable()" style="margin-top:10px;"></div>
     </section>
 
-    <section id="book" class="pane">
+    <section id="pane-book" class="pane">
         <div class="card"><div class="card-title" data-key="title_book"></div><div id="chronicle-box"></div></div>
     </section>
 
-    <section id="status" class="pane">
+    <section id="pane-status" class="pane">
         <div class="card">
             <div class="card-title" data-key="title_status"></div>
             <div class="grid">
@@ -98,16 +98,10 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
         <div class="card">
             <div class="card-title" data-key="title_governance"></div>
             <div class="grid" style="grid-template-columns: 1fr 1fr; align-items: end;">
-                <div>
-                    <div class="label" data-key="label_target"></div>
-                    <select id="gov-target"></select>
-                </div>
-                <div>
-                    <div class="label" data-key="label_mode"></div>
-                    <select id="gov-mode"></select>
-                </div>
+                <div><div class="label" data-key="label_target"></div><select id="gov-target"></select></div>
+                <div><div class="label" data-key="label_mode"></div><select id="gov-mode"></select></div>
             </div>
-            <button class="btn btn-neutral" data-key="btn_apply_gov" onclick="applyGovernance()"></button>
+            <button class="btn btn-neutral" data-key="btn_apply_gov" onclick="applyGovernance()" style="margin-top:10px;"></button>
         </div>
         <div class="card">
             <div class="card-title" data-key="title_clean"></div>
@@ -151,12 +145,15 @@ const DICTIONARY = {
     }
 };
 
-let studio = JSON.parse(localStorage.getItem('tabula_rasa_v69')) || { 
+let studio = JSON.parse(localStorage.getItem('tabula_rasa_v70')) || { 
     tension: 0.05, scenery: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])), tone: 'neutral', lang: 'en', chronicles: [],
     gov: { cleaning: 'manual', door: 'manual', studio: 'manual' }
 };
 
+function save() { localStorage.setItem('tabula_rasa_v70', JSON.stringify(studio)); }
+
 function applyTheme(isManual = false) {
+    if(isManual) studio.tone = document.getElementById('ui-tone').value;
     const theme = TONES[studio.tone];
     const root = document.documentElement;
     Object.keys(theme).forEach(key => root.style.setProperty(`--${key}`, theme[key]));
@@ -186,6 +183,7 @@ function updateLabels() {
 
 function updateSelect(id, list, current) {
     const sel = document.getElementById(id);
+    if(!sel) return;
     sel.innerHTML = '';
     Object.keys(list).forEach(key => {
         const opt = new Option(list[key], key);
@@ -201,7 +199,12 @@ function updateUI() {
     document.getElementById('chronicle-box').innerHTML = studio.chronicles.map(c => `<p><i>[${c.t}]</i> ${c.m}</p>`).reverse().join('');
 }
 
-function save() { localStorage.setItem('tabula_rasa_v69', JSON.stringify(studio)); }
+function showPane(id) {
+    document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('pane-' + id).classList.add('active');
+    document.getElementById('btn-' + id).classList.add('active');
+}
 
 function paintOnCanvas(){
     const c=document.getElementById('color-choice').value;
@@ -215,7 +218,7 @@ function applyGovernance() {
     const mode = document.getElementById('gov-mode').value;
     studio.gov[target] = mode;
     const d = DICTIONARY[studio.lang];
-    writeChronicle(d.targets[target] + (studio.lang==='jp'?'を':' to ') + d.modes[mode] + (studio.lang==='jp'?'に設定しました':' set.'));
+    writeChronicle(d.targets[target] + (studio.lang==='jp'?'の様式を':' mode to ') + d.modes[mode] + (studio.lang==='jp'?'に設定しました':' set.'));
     save();
 }
 
@@ -232,6 +235,12 @@ function executeClean() {
     
     writeChronicle(d.targets[target] + (studio.lang==='jp'?'を清めました':' cleaned.'));
     save(); updateUI();
+}
+
+function writeChronicle(msg){
+    studio.chronicles.push({t: new Date().toLocaleTimeString(), m: msg});
+    if(studio.chronicles.length>100) studio.chronicles.shift();
+    updateUI();
 }
 
 function drawLayer(){ 
@@ -265,4 +274,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
