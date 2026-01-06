@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MSGAI - Sovereign Palette V49.0</title>
+<title>MSGAI - Sovereign Studio V50.0</title>
 <style>
 :root { --ratio: 1.618; --accent: #007bff; --bg: #0b0e11; --surface: #15191d; --text: #e9ecef; }
 body { font-family: 'Inter', sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
@@ -31,12 +31,11 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
 </head>
 <body>
 <header>
-    <div class="brand">MSGAI ART-STUDIO V49.0</div>
+    <div class="brand">MSGAI STUDIO V50.0</div>
     <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 0.6rem; color: #666; font-weight: bold; text-transform: uppercase;">Palette:</span>
-        <select id="studio-palette" onchange="switchPalette()" style="width:auto; margin:0; font-size:0.7rem;">
-            <option value="en">Default Tone</option><option value="jp">理の色調</option>
-        </select>
+        <span style="font-size: 0.6rem; color: #666; font-weight: bold;">PALETTE:</span>
+        <select id="active-palette" onchange="applyPalette()" style="width:auto; margin:0; font-size:0.7rem;">
+            </select>
     </div>
 </header>
 <nav>
@@ -57,23 +56,23 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
                     <button class="mode-btn" id="m-auto" onclick="setTechnique('auto')">RESONANT</button>
                     <button class="mode-btn" id="m-self" onclick="setTechnique('self')">EVO</button>
                 </div>
-                <select id="color-choice"></select><input type="number" id="brush-intensity" value="100">
-                <button class="btn btn-danger" data-key="btn_paint" onclick="paintStroke()">PAINT</button>
+                <select id="color-select"></select><input type="number" id="brush-intensity" value="100">
+                <button class="btn btn-danger" data-key="btn_paint" onclick="paintOnCanvas()">PAINT</button>
             </div>
             <div class="card">
                 <div class="card-title" data-key="title_painting">PAINTING</div>
-                <input type="text" id="subject-ref" placeholder="Subject..."><input type="number" id="stroke-depth" value="50">
-                <button class="btn btn-primary" data-key="btn_draw" onclick="drawLayer()">DRAW</button>
+                <input type="text" id="subject-node" placeholder="Subject..."><input type="number" id="stroke-depth" value="50">
+                <button class="btn btn-primary" data-key="btn_draw" onclick="drawStroke()">DRAW</button>
             </div>
         </div>
     </section>
 
     <section id="window" class="pane">
-        <div class="card"><div class="card-title" data-key="title_window">WINDOW</div><button class="btn btn-primary" data-key="btn_scan" onclick="viewWindow()">SCAN</button><div id="window-signals" style="margin-top:10px;"></div></div>
+        <div class="card"><div class="card-title" data-key="title_window">WINDOW</div><button class="btn btn-primary" data-key="btn_scan" onclick="peekWindow()">SCAN</button><div id="window-signals" style="margin-top:10px;"></div></div>
     </section>
 
     <section id="table" class="pane">
-        <div class="card"><div class="card-title" data-key="title_table">TABLE</div><div id="console"></div><input type="text" id="concept-in" placeholder="..." onkeydown="if(event.key==='Enter') applyTable()" style="margin-top:10px;"></div>
+        <div class="card"><div class="card-title" data-key="title_table">TABLE</div><div id="console"></div><input type="text" id="concept-in" placeholder="..." onkeydown="if(event.key==='Enter') useTable()" style="margin-top:10px;"></div>
     </section>
 
     <section id="book" class="pane">
@@ -92,48 +91,53 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
     </section>
 </main>
 <script>
-const COLOR_SYSTEM=["USD","JPY","EUR","BTC","ETH","MATIC"]; const PHI=1.618;
-const DICTIONARY={
-    en:{title_canvas:"CANVAS",title_colors:"COLORS",title_painting:"PAINTING",title_window:"WINDOW",title_table:"TABLE",title_book:"BOOK",title_screen:"SCREEN",btn_paint:"PAINT",btn_draw:"DRAW",btn_scan:"SCAN",btn_erase:"ERASE CANVAS",label_z:"z-colors",label_w:"w-colors"},
-    jp:{title_canvas:"因果の布",title_colors:"色彩の源",title_painting:"描写の構成",title_window:"観測の窓",title_table:"理の台",title_book:"因果の書",title_screen:"理の幕",btn_paint:"筆を入れる",btn_draw:"線を引く",btn_scan:"窓から観測",btn_erase:"布を清める",label_z:"zの彩度",label_w:"wの調和"}
+const COLOR_ASSETS=["USD","JPY","EUR","BTC","ETH","MATIC"]; const PHI=1.618;
+// パレット（言語定義）の重層構造
+const PALETTES = {
+    en: { name: "Default Tone", keys: { title_canvas:"CANVAS",title_colors:"COLORS",title_painting:"PAINTING",title_window:"WINDOW",title_table:"TABLE",title_book:"BOOK",title_screen:"SCREEN",btn_paint:"PAINT",btn_draw:"DRAW",btn_scan:"SCAN",btn_erase:"ERASE CANVAS",label_z:"z-colors",label_w:"w-colors"} },
+    jp: { name: "理の色調", keys: { title_canvas:"因果の布",title_colors:"色彩の源",title_painting:"描写の構成",title_window:"観測の窓",title_table:"理の台",title_book:"因果の書",title_screen:"理の幕",btn_paint:"筆を入れる",btn_draw:"線を引く",btn_scan:"窓から観測",btn_erase:"布を清める",label_z:"zの彩度",label_w:"wの調和"} }
 };
-let studio = JSON.parse(localStorage.getItem('msgai_v49_studio')) || { tension: 0.05, scenery: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])), lang: 'en', technique: 'manual', chronicles: [] };
 
-function updateStudioUI(){
-    const d = DICTIONARY[studio.lang] || DICTIONARY.en;
-    document.querySelectorAll('[data-key]').forEach(el => { const k=el.getAttribute('data-key'); if(d[k]) el.textContent=d[k]; });
+let studio = JSON.parse(localStorage.getItem('msgai_v50_studio')) || { tension: 0.05, scenery: Object.fromEntries(COLOR_ASSETS.map(c => [c, 0])), activePalette: 'en', technique: 'manual', chronicles: [] };
+
+function updateGallery(){
+    const p = PALETTES[studio.activePalette] || PALETTES.en;
+    document.querySelectorAll('[data-key]').forEach(el => { const k=el.getAttribute('data-key'); if(p.keys[k]) el.textContent=p.keys[k]; });
     document.getElementById('z-val').textContent = studio.tension.toFixed(6);
     document.getElementById('w-val').textContent = (PHI/(studio.tension||0.001)).toFixed(2);
-    document.getElementById('scenery-display').innerHTML = COLOR_SYSTEM.map(c => `<div class="data-node"><div class="label">${c}</div><div class="value">${(studio.scenery[c]||0).toFixed(4)}</div></div>`).join('');
+    document.getElementById('scenery-display').innerHTML = COLOR_ASSETS.map(c => `<div class="data-node"><div class="label">${c}</div><div class="value">${(studio.scenery[c]||0).toFixed(4)}</div></div>`).join('');
     document.getElementById('chronicle-box').innerHTML = studio.chronicles.map(c => `<p><i>[${c.t}]</i> ${c.m}</p>`).reverse().join('');
-    localStorage.setItem('msgai_v49_studio', JSON.stringify(studio));
+    localStorage.setItem('msgai_v50_studio', JSON.stringify(studio));
 }
 
-function addChronicle(msg){ studio.chronicles.push({t: new Date().toLocaleTimeString(), m: msg}); if(studio.chronicles.length>100) studio.chronicles.shift(); updateStudioUI(); }
-function setTechnique(t){ studio.technique = t; document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active')); document.getElementById('m-'+t).classList.add('active'); addChronicle(`Technique: ${t.toUpperCase()}`); }
+function writeChronicle(msg){ studio.chronicles.push({t: new Date().toLocaleTimeString(), m: msg}); if(studio.chronicles.length>100) studio.chronicles.shift(); updateGallery(); }
+function setTechnique(t){ studio.technique = t; document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active')); document.getElementById('m-'+t).classList.add('active'); writeChronicle(`Technique shifted: ${t.toUpperCase()}`); }
 function showPane(id){ document.querySelectorAll('.pane, .tab').forEach(el=>el.classList.remove('active')); document.getElementById(id).classList.add('active'); document.getElementById('tab-'+id).classList.add('active'); }
-function switchPalette(){ studio.lang = document.getElementById('studio-palette').value; updateStudioUI(); }
+function applyPalette(){ studio.activePalette = document.getElementById('active-palette').value; updateGallery(); }
 
-function paintStroke(){
-    const c=document.getElementById('color-choice').value;
+function paintOnCanvas(){
+    const c=document.getElementById('color-select').value;
     const v=parseFloat(document.getElementById('brush-intensity').value);
-    studio.scenery[c] += (v/100)*PHI;
-    studio.tension += (v/5000);
-    addChronicle(`Applied ${v} of ${c} color-system.`);
-    updateStudioUI();
+    studio.scenery[c] += (v/100)*PHI; studio.tension += (v/5000);
+    writeChronicle(`Applied ${v} of ${c} color-system.`); updateGallery();
 }
 
-function drawLayer(){ addChronicle(`A layer of stroke depth was applied.`); alert("Layered."); }
-function viewWindow(){ addChronicle("Observing external visual inspiration..."); setTimeout(()=>{ addChronicle("Remote visual signal harmonized."); }, 1000); }
-function applyTable(){ 
+function drawStroke(){ writeChronicle(`Added a specific layer depth.`); alert("Layered."); }
+function peekWindow(){ writeChronicle("Observing external visual signal..."); setTimeout(()=>{ writeChronicle("Signal captured and harmonized."); }, 1000); }
+function useTable(){ 
     const input=document.getElementById('concept-in').value; if(!input)return;
     document.getElementById('console').innerHTML+=`<div>> ${input}</div>`;
-    addChronicle("Conceptualized a sketch at the table.");
-    document.getElementById('concept-in').value=''; 
+    writeChronicle("Conceptualizing at the studio table."); document.getElementById('concept-in').value=''; 
 }
-function eraseCanvas(){ if(confirm(studio.lang==='jp'?"表現を初期化し、布を清めますか？":"Clear the canvas and start fresh?")){ localStorage.clear(); location.reload(); } }
+function eraseCanvas(){ if(confirm(studio.activePalette==='jp'?"表現を初期化し、布を清めますか？":"Clear the canvas?")){ localStorage.clear(); location.reload(); } }
 
-document.addEventListener('DOMContentLoaded', () => { COLOR_SYSTEM.forEach(c => document.getElementById('color-choice').add(new Option(c, c))); updateStudioUI(); });
+document.addEventListener('DOMContentLoaded', () => {
+    const sel = document.getElementById('active-palette');
+    Object.keys(PALETTES).forEach(k => sel.add(new Option(PALETTES[k].name, k)));
+    sel.value = studio.activePalette;
+    COLOR_ASSETS.forEach(c => document.getElementById('color-select').add(new Option(c, c)));
+    updateGallery();
+});
 </script>
 </body>
 </html>
