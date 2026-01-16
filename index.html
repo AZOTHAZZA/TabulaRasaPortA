@@ -128,7 +128,7 @@ const DICTIONARY = {
     en: { 
         super_title: "TABULA RASA", brand_port_a: "PURE PORT A",
         tab_canvas: "PORT A", tab_book: "ARCHIVE", tab_status: "STATUS", 
-        title_total: "PORT A TOTAL BALANCE", title_warehouse: "PORT A WAREHOUSE",
+        title_total: "PORT A TOTAL", title_warehouse: "PORT A WAREHOUSE",
         title_export: "EXPORT PORT A", title_import: "IMPORT PORT A",
         btn_vanning: "VANNING TO WAREHOUSE", btn_move_export: "TRANSPORT TO EXPORT A",
         btn_sailing: "SAILING", btn_arrival: "APPROVE ARRIVAL", btn_devanning: "DEVANNING",
@@ -137,7 +137,7 @@ const DICTIONARY = {
     jp: { 
         super_title: "タブラ・ラサ", brand_port_a: "ピュア・ポートA",
         tab_canvas: "港 A (ポートA)", tab_book: "公文書", tab_status: "状態", 
-        title_total: "港 A 全体 (ポートA全体) の残高", title_warehouse: "港 A 倉庫 (ポートA倉庫)",
+        title_total: "港 A 全体 (ポートA全体)", title_warehouse: "港 A 倉庫 (ポートA倉庫)",
         title_export: "輸出港 A (エクスポート・ポートA)", title_import: "輸入港 A (インポート・ポートA)",
         btn_vanning: "倉庫へ積み込み (ヴァンニング)", btn_move_export: "輸出港 A へ輸送",
         btn_sailing: "出港 (セーリング)", btn_arrival: "入港を承認 (入港確認)", btn_devanning: "倉庫へ積み下ろし (デヴァンニング)",
@@ -145,7 +145,7 @@ const DICTIONARY = {
     }
 };
 
-let studio = JSON.parse(localStorage.getItem('tabula_rasa_port_a_v14')) || { 
+let studio = JSON.parse(localStorage.getItem('tabula_rasa_port_a_v14.1')) || { 
     tension: 0.05, 
     assets: {
         warehouse: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])),
@@ -155,7 +155,7 @@ let studio = JSON.parse(localStorage.getItem('tabula_rasa_port_a_v14')) || {
     tone: 'neutral', lang: 'jp', chronicles: []
 };
 
-function save() { localStorage.setItem('tabula_rasa_port_a_v14', JSON.stringify(studio)); }
+function save() { localStorage.setItem('tabula_rasa_port_a_v14.1', JSON.stringify(studio)); }
 
 function renderGrid(targetId, data) {
     document.getElementById(targetId).innerHTML = COLOR_SYSTEM.map(c => `
@@ -177,7 +177,6 @@ function updateUI() {
     document.getElementById('w-val').textContent = (1 / (mz || 0.001)).toFixed(6);
     document.getElementById('chronicle-box').innerHTML = (studio.chronicles || []).map(c => `<p><i>[${c.t}]</i> ${c.m}</p>`).reverse().join('');
     
-    // PORT A として入港信号をチェック
     const incoming = localStorage.getItem('TR_Bridge_to_PORT_A');
     const display = document.getElementById('import-manifest');
     if (incoming) {
@@ -222,7 +221,6 @@ function sailing() {
         id: "MANI-A" + Math.floor(Date.now()/1000).toString(16).toUpperCase() 
     };
     
-    // 指定された宛先名に基づく動的ルーティング
     localStorage.setItem('TR_Bridge_to_' + destName, JSON.stringify(manifest));
     writeChronicle(`[出港] ${destName} へ向けて ${v} ${c} がセーリング (ID: ${manifest.id})`);
     
