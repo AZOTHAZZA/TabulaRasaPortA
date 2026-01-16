@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tabula Rasa - PURE PORT A</title>
+<title>Tabula Rasa - PORT A</title>
 <style>
 :root { --ratio: 1.618; --bg: #0b0e11; --surface: #15191d; --accent: #6c757d; --text: #e9ecef; --border: #2d333b; --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 body { font-family: 'Inter', 'Noto Sans JP', sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
@@ -32,8 +32,8 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
 <body>
 <header>
     <div class="brand-group">
-        <div class="super-title">TABULA RASA</div>
-        <div class="brand">PORT A</div>
+        <div class="super-title" data-key="super_title">TABULA RASA</div>
+        <div class="brand" id="brand-display" data-key="brand_port_a">PORT A</div>
     </div>
     <div style="display: flex; align-items: center; gap: 10px;">
         <select id="ui-tone" onchange="applyTheme()" style="width:auto; margin:0; font-size:0.65rem; background:#000; color:#fff; border:1px solid #333;">
@@ -56,7 +56,7 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
         <div class="card"><div class="card-title" data-key="title_canvas">PORT</div><div class="grid" id="scenery-display"></div></div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
             <div class="card">
-                <div class="card-title" data-key="title_colors">積み込み (Vanning)</div>
+                <div class="card-title" data-key="title_vanning">積み込み (Vanning)</div>
                 <select id="color-choice"></select>
                 <div class="label" data-key="label_intensity">Quantity</div>
                 <input type="number" id="brush-intensity" value="100">
@@ -75,15 +75,15 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
 
     <section id="pane-status" class="pane">
         <div class="card">
-            <div class="card-title" data-key="title_status">PHASE STATUS</div>
+            <div class="card-title" data-key="title_status">LOGISTICS STATUS</div>
             <div class="grid">
                 <div class="data-node"><div class="label" data-key="label_z">z-Logos</div><div class="value" id="z-val">0</div></div>
                 <div class="data-node"><div class="label" data-key="label_w">w-Logos</div><div class="value" id="w-val">0</div></div>
             </div>
         </div>
         <div class="card">
-            <div class="card-title">RESET</div>
-            <button class="btn btn-danger" onclick="executeClean()">Reset Port</button>
+            <div class="card-title" data-key="title_reset">RESET</div>
+            <button class="btn btn-danger" onclick="executeClean()" data-key="btn_reset">Reset Port</button>
         </div>
     </section>
 </main>
@@ -99,18 +99,22 @@ const TONES = {
 
 const DICTIONARY = {
     en: { 
+        super_title: "TABULA RASA", 
+        brand_port_a: "PORT A",
         tab_canvas: "PORT A", tab_status: "STATUS", 
-        title_canvas: "PORT", title_colors: "Vanning", label_z: "z-Logos", label_w: "w-Logos",
+        title_canvas: "PORT", title_vanning: "Vanning", label_z: "z-Logos", label_w: "w-Logos",
         btn_paint_plus: "LOAD (+)", btn_paint_minus: "UNLOAD (-)", label_intensity: "Quantity",
         title_sailing: "Sailing", label_destination: "Destination: PORT B", btn_sailing: "Sailing",
-        title_status: "LOGISTICS STATUS"
+        title_status: "LOGISTICS STATUS", title_reset: "RESET", btn_reset: "Reset Port"
     },
     jp: { 
-        tab_canvas: "PORT A", tab_status: "状態", 
-        title_canvas: "PORT", title_colors: "積み込み (Vanning)", label_z: "zの数理", label_w: "wの数理",
+        super_title: "タブラ・ラサ", 
+        brand_port_a: "PORT A",
+        tab_canvas: "港 A (PORT A)", tab_status: "状態", 
+        title_canvas: "港 (PORT)", title_vanning: "積み込み (Vanning)", label_z: "zの数理", label_w: "wの数理",
         btn_paint_plus: "増加 (+)", btn_paint_minus: "減少 (-)", label_intensity: "数量",
-        title_sailing: "出港 (Sailing)", label_destination: "移動先: PORT B", btn_sailing: "出港する (Sailing)",
-        title_status: "物流の状態"
+        title_sailing: "出港 (Sailing)", label_destination: "移動先: 港 B (PORT B)", btn_sailing: "出港する (Sailing)",
+        title_status: "物流の状態", title_reset: "初期化", btn_reset: "港をリセット"
     }
 };
 
@@ -175,8 +179,8 @@ function transferToPlus() {
     const c = document.getElementById('color-choice').value;
     const v = Math.abs(parseFloat(document.getElementById('brush-intensity').value));
     
-    if (isNaN(v) || v <= 0) { alert("数量を入力してください / Enter quantity"); return; }
-    if ((studio.scenery[c] || 0) < v) { alert("残高が不足しています / Insufficient balance"); return; }
+    if (isNaN(v) || v <= 0) { alert(studio.lang==='jp'?"数量を入力してください":"Enter quantity"); return; }
+    if ((studio.scenery[c] || 0) < v) { alert(studio.lang==='jp'?"残高が不足しています":"Insufficient balance"); return; }
 
     studio.scenery[c] -= v;
     const transferPacket = {
@@ -189,7 +193,10 @@ function transferToPlus() {
     localStorage.setItem('TR_Bridge_to_Plus', JSON.stringify(transferPacket));
     save();
     updateUI();
-    alert(`出港完了: ${v} ${c} が PORT B へ向けて航行を開始しました。`);
+    const msg = studio.lang==='jp' 
+        ? `出港完了: ${v} ${c} が 港 B (PORT B) へ向けて航行を開始しました。`
+        : `Sailing started: ${v} ${c} is heading to PORT B.`;
+    alert(msg);
 }
 
 function showPane(id) {
@@ -200,7 +207,7 @@ function showPane(id) {
 }
 
 function executeClean() {
-    if(!confirm("Reset Port?")) return;
+    if(!confirm(studio.lang==='jp'?"港をリセットしますか？":"Reset Port?")) return;
     studio.scenery = Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0]));
     studio.tension = 0.05;
     save(); updateUI();
