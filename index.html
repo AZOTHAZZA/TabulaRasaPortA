@@ -4,7 +4,7 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tabula Rasa - PURE PORT A</title>
 <style>
-/* スタイル設定（階層構造を強調するため一部調整） */
+/* スタイルは維持し、階層構造を視覚的に整理 */
 :root { --ratio: 1.618; --bg: #0b0e11; --surface: #15191d; --accent: #6c757d; --text: #e9ecef; --border: #2d333b; }
 body { font-family: 'Inter', 'Noto Sans JP', sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 header { background: #000; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); flex-shrink: 0; }
@@ -87,7 +87,7 @@ input, select { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid
                 <div class="grid-mini" id="import-display" style="margin-bottom:10px;"></div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
                     <button class="btn btn-neutral" onclick="checkArrival()" data-key="btn_arrival">入港確認</button>
-                    <button class="btn btn-neutral" onclick="devanningToWarehouse()" data-key="btn_devanning">積み下ろし</button>
+                    <button class="btn btn-neutral" onclick="devanningToWarehouse()" data-key="btn_devanning">倉庫へ積み下ろし (デヴァンニング)</button>
                 </div>
             </div>
         </div>
@@ -96,7 +96,6 @@ input, select { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid
     <section id="pane-book" class="pane">
         <div class="card"><div class="card-title" data-key="title_book">公文書記録</div><div id="chronicle-box"></div></div>
     </section>
-
     <section id="pane-status" class="pane">
         <div class="card">
             <div class="card-title" data-key="title_status">港の状態</div>
@@ -128,7 +127,7 @@ const DICTIONARY = {
         title_total: "PORT A TOTAL BALANCE", title_warehouse: "PORT A WAREHOUSE",
         title_export: "EXPORT PORT A", title_import: "IMPORT PORT A",
         btn_vanning: "VANNING TO WAREHOUSE", btn_move_export: "MOVE TO EXPORT",
-        btn_sailing: "SAILING", btn_arrival: "CHECK ARRIVAL", btn_devanning: "DEVANNING",
+        btn_sailing: "SAILING", btn_arrival: "CHECK ARRIVAL", btn_devanning: "DEVANNING TO WAREHOUSE",
         label_z: "z-Status", label_w: "w-Status", title_book: "ARCHIVE", title_status: "PORT STATUS", title_reset: "CLEAN", btn_reset: "Clean Port"
     },
     jp: { 
@@ -137,12 +136,12 @@ const DICTIONARY = {
         title_total: "港 A 全体 (ポートA全体) の残高", title_warehouse: "港 A 倉庫 (ポートA倉庫)",
         title_export: "輸出港 A (エクスポート・ポートA)", title_import: "輸入港 A (インポート・ポートA)",
         btn_vanning: "倉庫へ積み込み (ヴァンニング)", btn_move_export: "輸出港 A へ回送",
-        btn_sailing: "出港する (セーリング)", btn_arrival: "入港確認", btn_devanning: "積み下ろし (デヴァンニング)",
+        btn_sailing: "出港する (セーリング)", btn_arrival: "入港確認", btn_devanning: "倉庫へ積み下ろし (デヴァンニング)",
         label_z: "zの状態", label_w: "wの状態", title_book: "公文書記録", title_status: "港の状態", title_reset: "港の掃除", btn_reset: "港を掃除する"
     }
 };
 
-let studio = JSON.parse(localStorage.getItem('tabula_rasa_port_a_v10')) || { 
+let studio = JSON.parse(localStorage.getItem('tabula_rasa_port_a_v11')) || { 
     tension: 0.05, 
     assets: {
         warehouse: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])),
@@ -152,7 +151,7 @@ let studio = JSON.parse(localStorage.getItem('tabula_rasa_port_a_v10')) || {
     tone: 'neutral', lang: 'jp', chronicles: []
 };
 
-function save() { localStorage.setItem('tabula_rasa_port_a_v10', JSON.stringify(studio)); }
+function save() { localStorage.setItem('tabula_rasa_port_a_v11', JSON.stringify(studio)); }
 
 function renderGrid(targetId, data) {
     document.getElementById(targetId).innerHTML = COLOR_SYSTEM.map(c => `
@@ -207,7 +206,7 @@ function sailing() {
     save(); updateUI();
 }
 
-// 4-1. 入港確認（輸入港に入れる）
+// 4-1. 入港確認 (輸入港へ入れる)
 function checkArrival() {
     const incoming = localStorage.getItem('TR_Bridge_to_A');
     if (!incoming) return alert("入港中の荷物はありません");
@@ -218,7 +217,7 @@ function checkArrival() {
     save(); updateUI();
 }
 
-// 4-2. 積み下ろし（輸入港から倉庫へ）
+// 4-2. 倉庫へ積み下ろし (デヴァンニング)
 function devanningToWarehouse() {
     let moved = false;
     COLOR_SYSTEM.forEach(unit => {
@@ -227,13 +226,14 @@ function devanningToWarehouse() {
             studio.assets.warehouse[unit] += amt;
             studio.assets.import[unit] = 0;
             moved = true;
-            writeChronicle(`${amt} ${unit} を輸入港 A から倉庫へ積み下ろし (デヴァンニング) しました`);
+            writeChronicle(`${amt} ${unit} を輸入港 A から港 A 倉庫へ積み下ろし (デヴァンニング) しました`);
         }
     });
-    if (!moved) return alert("輸入港に荷物がありません");
+    if (!moved) return alert("輸入港に荷がありません");
     save(); updateUI();
 }
 
+// 共通関数
 function updateLabels() {
     studio.lang = document.getElementById('ui-lang').value;
     const d = DICTIONARY[studio.lang];
@@ -246,7 +246,6 @@ function updateLabels() {
     COLOR_SYSTEM.forEach(c => sel.add(new Option(c, c)));
     updateUI();
 }
-
 function applyTheme() {
     studio.tone = document.getElementById('ui-tone').value;
     const theme = TONES[studio.tone];
@@ -254,20 +253,17 @@ function applyTheme() {
     Object.keys(theme).forEach(key => root.style.setProperty(`--${key}`, theme[key]));
     save();
 }
-
 function writeChronicle(msg){
     studio.chronicles.push({t: new Date().toLocaleTimeString(), m: msg});
     if(studio.chronicles.length>50) studio.chronicles.shift();
     updateUI();
 }
-
 function showPane(id) {
     document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.getElementById('pane-' + id).classList.add('active');
     document.getElementById('btn-' + id).classList.add('active');
 }
-
 function executeClean() {
     if(!confirm("港を掃除しますか？")) return;
     studio.assets = {
@@ -278,7 +274,6 @@ function executeClean() {
     studio.chronicles = [];
     save(); updateUI();
 }
-
 document.addEventListener('DOMContentLoaded', () => { 
     updateLabels(); applyTheme();
     setInterval(updateUI, 2000); 
