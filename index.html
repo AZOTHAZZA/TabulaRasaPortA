@@ -4,7 +4,7 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tabula Rasa - PURE PORT A</title>
 <style>
-/* スタイル設定は維持しつつ、グリッド表示を最適化 */
+/* スタイル設定（階層構造を強調するため一部調整） */
 :root { --ratio: 1.618; --bg: #0b0e11; --surface: #15191d; --accent: #6c757d; --text: #e9ecef; --border: #2d333b; }
 body { font-family: 'Inter', 'Noto Sans JP', sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 header { background: #000; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); flex-shrink: 0; }
@@ -28,7 +28,7 @@ input, select { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid
 .btn-neutral { background: var(--accent); color: #fff; }
 .btn-danger { background: #a71d2a; color: #fff; }
 .btn-bridge { background: #4a3f35; color: #d4a017; border: 1px solid #d4a017; }
-#chronicle-box { background: rgba(0,0,0,0.3); color: var(--text); padding: 12px; font-family: 'Georgia', serif; font-size: 0.8rem; height: 200px; overflow-y: auto; border-radius: 6px; border: 1px solid var(--border); line-height: 1.5; }
+#chronicle-box { background: rgba(0,0,0,0.3); color: var(--text); padding: 12px; font-family: 'Georgia', serif; font-size: 0.8rem; height: 180px; overflow-y: auto; border-radius: 6px; border: 1px solid var(--border); line-height: 1.5; }
 </style>
 </head>
 <body>
@@ -50,34 +50,44 @@ input, select { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid
     </div>
 </header>
 <nav id="main-nav">
-    <button class="tab active" id="btn-canvas" onclick="showPane('canvas')" data-key="tab_canvas">港 A 全体 (ポートA全体)</button>
+    <button class="tab active" id="btn-canvas" onclick="showPane('canvas')" data-key="tab_canvas">港 A (ポートA)</button>
     <button class="tab" id="btn-book" onclick="showPane('book')" data-key="tab_book">公文書</button>
     <button class="tab" id="btn-status" onclick="showPane('status')" data-key="tab_status">状態</button>
 </nav>
 <main id="viewport">
     <section id="pane-canvas" class="pane active">
-        <div class="card"><div class="card-title" data-key="title_total">港 A 全体 (ポートA全体)</div><div class="grid-mini" id="total-display"></div></div>
+        <div class="card">
+            <div class="card-title" data-key="title_total">港 A 全体 (ポートA全体)</div>
+            <div class="grid-mini" id="total-display"></div>
+        </div>
         
+        <div class="card" style="border-color: var(--accent);">
+            <div class="card-title" data-key="title_warehouse">港 A 倉庫 (ポートA倉庫)</div>
+            <div class="grid-mini" id="warehouse-display" style="margin-bottom:10px;"></div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                <div>
+                    <select id="color-choice"></select>
+                    <input type="number" id="brush-intensity" value="100">
+                    <button class="btn btn-neutral" onclick="vanningToWarehouse()" data-key="btn_vanning">倉庫へ積み込み (ヴァンニング)</button>
+                </div>
+                <div style="display:flex; align-items:flex-end;">
+                    <button class="btn btn-bridge" onclick="moveToExport()" data-key="btn_move_export">輸出港 A へ回送</button>
+                </div>
+            </div>
+        </div>
+
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
             <div class="card">
-                <div class="card-title" data-key="title_warehouse">港 A 倉庫 (ポートA倉庫)</div>
-                <div class="grid-mini" id="warehouse-display" style="margin-bottom:10px;"></div>
-                <select id="color-choice"></select>
-                <input type="number" id="brush-intensity" value="100">
-                <button class="btn btn-neutral" onclick="vanningToWarehouse()" data-key="btn_vanning">倉庫へ積み込み (ヴァンニング)</button>
-                <button class="btn btn-bridge" onclick="moveToExport()" data-key="btn_move_export">輸出港 A へ回送</button>
+                <div class="card-title" data-key="title_export">輸出港 A (エクスポート・ポートA)</div>
+                <div class="grid-mini" id="export-display" style="margin-bottom:10px;"></div>
+                <button class="btn btn-bridge" onclick="sailing()" data-key="btn_sailing">出港する (セーリング)</button>
             </div>
-            
-            <div style="display:flex; flex-direction:column; gap:15px;">
-                <div class="card">
-                    <div class="card-title" data-key="title_export">輸出港 A (エクスポート・ポートA)</div>
-                    <div class="grid-mini" id="export-display" style="margin-bottom:10px;"></div>
-                    <button class="btn btn-bridge" onclick="sailing()" data-key="btn_sailing">出港する (セーリング)</button>
-                </div>
-                <div class="card">
-                    <div class="card-title" data-key="title_import">輸入港 A (インポート・ポートA)</div>
-                    <div class="grid-mini" id="import-display" style="margin-bottom:10px;"></div>
-                    <button class="btn btn-neutral" onclick="devanningToWarehouse()" data-key="btn_devanning">入港確認 / 積み下ろし</button>
+            <div class="card">
+                <div class="card-title" data-key="title_import">輸入港 A (インポート・ポートA)</div>
+                <div class="grid-mini" id="import-display" style="margin-bottom:10px;"></div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                    <button class="btn btn-neutral" onclick="checkArrival()" data-key="btn_arrival">入港確認</button>
+                    <button class="btn btn-neutral" onclick="devanningToWarehouse()" data-key="btn_devanning">積み下ろし</button>
                 </div>
             </div>
         </div>
@@ -114,25 +124,25 @@ const TONES = {
 const DICTIONARY = {
     en: { 
         super_title: "TABULA RASA", brand_port_a: "PURE PORT A",
-        tab_canvas: "PORT A TOTAL", tab_book: "ARCHIVE", tab_status: "STATUS", 
+        tab_canvas: "PORT A", tab_book: "ARCHIVE", tab_status: "STATUS", 
         title_total: "PORT A TOTAL BALANCE", title_warehouse: "PORT A WAREHOUSE",
         title_export: "EXPORT PORT A", title_import: "IMPORT PORT A",
         btn_vanning: "VANNING TO WAREHOUSE", btn_move_export: "MOVE TO EXPORT",
-        btn_sailing: "SAILING", btn_devanning: "DEVANNING TO WAREHOUSE",
-        label_z: "z-Status", label_w: "w-Status", title_reset: "CLEAN PORT", btn_reset: "Clean Port"
+        btn_sailing: "SAILING", btn_arrival: "CHECK ARRIVAL", btn_devanning: "DEVANNING",
+        label_z: "z-Status", label_w: "w-Status", title_book: "ARCHIVE", title_status: "PORT STATUS", title_reset: "CLEAN", btn_reset: "Clean Port"
     },
     jp: { 
         super_title: "タブラ・ラサ", brand_port_a: "ピュア・ポートA",
-        tab_canvas: "港 A 全体 (ポートA全体)", tab_book: "公文書", tab_status: "状態", 
+        tab_canvas: "港 A (ポートA)", tab_book: "公文書", tab_status: "状態", 
         title_total: "港 A 全体 (ポートA全体) の残高", title_warehouse: "港 A 倉庫 (ポートA倉庫)",
         title_export: "輸出港 A (エクスポート・ポートA)", title_import: "輸入港 A (インポート・ポートA)",
         btn_vanning: "倉庫へ積み込み (ヴァンニング)", btn_move_export: "輸出港 A へ回送",
-        btn_sailing: "出港する (セーリング)", btn_devanning: "入港確認 / 積み下ろし (デヴァンニング)",
-        label_z: "zの状態", label_w: "wの状態", title_reset: "港の掃除", btn_reset: "港を掃除する"
+        btn_sailing: "出港する (セーリング)", btn_arrival: "入港確認", btn_devanning: "積み下ろし (デヴァンニング)",
+        label_z: "zの状態", label_w: "wの状態", title_book: "公文書記録", title_status: "港の状態", title_reset: "港の掃除", btn_reset: "港を掃除する"
     }
 };
 
-let studio = JSON.parse(localStorage.getItem('tabula_rasa_port_a_v9')) || { 
+let studio = JSON.parse(localStorage.getItem('tabula_rasa_port_a_v10')) || { 
     tension: 0.05, 
     assets: {
         warehouse: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])),
@@ -142,7 +152,7 @@ let studio = JSON.parse(localStorage.getItem('tabula_rasa_port_a_v9')) || {
     tone: 'neutral', lang: 'jp', chronicles: []
 };
 
-function save() { localStorage.setItem('tabula_rasa_port_a_v9', JSON.stringify(studio)); }
+function save() { localStorage.setItem('tabula_rasa_port_a_v10', JSON.stringify(studio)); }
 
 function renderGrid(targetId, data) {
     document.getElementById(targetId).innerHTML = COLOR_SYSTEM.map(c => `
@@ -171,7 +181,7 @@ function vanningToWarehouse() {
     const v = Math.abs(parseFloat(document.getElementById('brush-intensity').value));
     if (isNaN(v)) return;
     studio.assets.warehouse[c] += v;
-    writeChronicle(`${v} ${c} を倉庫へ積み込み (ヴァンニング) しました`);
+    writeChronicle(`${v} ${c} を港 A 倉庫へ積み込み (ヴァンニング) しました`);
     save(); updateUI();
 }
 
@@ -197,14 +207,30 @@ function sailing() {
     save(); updateUI();
 }
 
-// 4. 入港確認とデヴァンニング
-function devanningToWarehouse() {
+// 4-1. 入港確認（輸入港に入れる）
+function checkArrival() {
     const incoming = localStorage.getItem('TR_Bridge_to_A');
-    if (!incoming) return alert("入港中の荷物なし");
+    if (!incoming) return alert("入港中の荷物はありません");
     const p = JSON.parse(incoming);
-    studio.assets.warehouse[p.unit] += p.amount;
+    studio.assets.import[p.unit] += p.amount;
     localStorage.removeItem('TR_Bridge_to_A');
-    writeChronicle(`${p.amount} ${p.unit} を倉庫へ積み下ろし (デヴァンニング) しました`);
+    writeChronicle(`${p.amount} ${p.unit} が輸入港 A に到着 (入港確認) しました`);
+    save(); updateUI();
+}
+
+// 4-2. 積み下ろし（輸入港から倉庫へ）
+function devanningToWarehouse() {
+    let moved = false;
+    COLOR_SYSTEM.forEach(unit => {
+        const amt = studio.assets.import[unit];
+        if (amt > 0) {
+            studio.assets.warehouse[unit] += amt;
+            studio.assets.import[unit] = 0;
+            moved = true;
+            writeChronicle(`${amt} ${unit} を輸入港 A から倉庫へ積み下ろし (デヴァンニング) しました`);
+        }
+    });
+    if (!moved) return alert("輸入港に荷物がありません");
     save(); updateUI();
 }
 
@@ -255,16 +281,7 @@ function executeClean() {
 
 document.addEventListener('DOMContentLoaded', () => { 
     updateLabels(); applyTheme();
-    setInterval(() => {
-        const incoming = localStorage.getItem('TR_Bridge_to_A');
-        const display = document.getElementById('import-display');
-        if(incoming) {
-            const p = JSON.parse(incoming);
-            display.innerHTML = `<div class="data-node" style="border-color:var(--accent)"><div class="label">ARRIVING: ${p.sender}</div><div class="value">${p.amount} ${p.unit}</div></div>`;
-        } else {
-            renderGrid('import-display', studio.assets.import);
-        }
-    }, 2000);
+    setInterval(updateUI, 2000); 
 });
 </script>
 </body>
