@@ -4,7 +4,7 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tabula Rasa - PURE PORT A</title>
 <style>
-/* スタイルはあなたの美学を継承 */
+/* スタイル定義（変更なし） */
 :root { --ratio: 1.618; --bg: #0b0e11; --surface: #15191d; --accent: #6c757d; --text: #e9ecef; --border: #2d333b; }
 body { font-family: 'Inter', 'Noto Sans JP', sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 header { background: #000; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); flex-shrink: 0; }
@@ -51,19 +51,19 @@ input, select { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid
     </div>
 </header>
 <nav id="main-nav">
-    <button class="tab active" id="btn-canvas" onclick="showPane('canvas')" data-key="tab_canvas">港 A (ポートA)</button>
+    <button class="tab active" id="btn-canvas" onclick="showPane('canvas')" data-key="tab_canvas">港 A</button>
     <button class="tab" id="btn-book" onclick="showPane('book')" data-key="tab_book">公文書</button>
     <button class="tab" id="btn-status" onclick="showPane('status')" data-key="tab_status">状態</button>
 </nav>
 <main id="viewport">
     <section id="pane-canvas" class="pane active">
         <div class="card">
-            <div class="card-title" data-key="title_total">港 A 全体 (ポートA全体)</div>
+            <div class="card-title" data-key="title_total">港 A 全体</div>
             <div class="grid-mini" id="total-display"></div>
         </div>
         
         <div class="card" style="border-color: var(--accent);">
-            <div class="card-title" data-key="title_warehouse">港 A 倉庫 (ポートA倉庫)</div>
+            <div class="card-title" data-key="title_warehouse">港 A 倉庫</div>
             <div class="grid-mini" id="warehouse-display" style="margin-bottom:10px;"></div>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
                 <div>
@@ -79,15 +79,15 @@ input, select { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
             <div class="card">
-                <div class="card-title" data-key="title_export">輸出港 A (エクスポート)</div>
+                <div class="card-title" data-key="title_export">輸出港 A</div>
                 <div class="grid-mini" id="export-display" style="margin-bottom:10px;"></div>
-                <label class="label">出港先:</label>
+                <label class="label" data-key="label_dest">出港先:</label>
                 <input type="text" id="destination-input" value="PORT_B">
                 <button class="btn btn-bridge" onclick="sailingAction()" data-key="btn_sailing">出港</button>
             </div>
             <div class="card">
-                <div class="card-title" data-key="title_import">輸入港 A (インポート)</div>
-                <div id="import-manifest" class="manifest-view">待機中の輸送体なし</div>
+                <div class="card-title" data-key="title_import">輸入港 A</div>
+                <div id="import-manifest" class="manifest-view"></div>
                 <div class="grid-mini" id="import-display" style="margin-bottom:10px;"></div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
                     <button class="btn btn-neutral" onclick="devanningAction()" data-key="btn_devanning">積み下ろし</button>
@@ -116,27 +116,20 @@ input, select { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid
 </main>
 
 <script>
-/** * 宇宙の法（アルケー）と定数の定義 
- */
 const COLOR_SYSTEM = ["PURE", "USD", "JPY", "EUR", "BTC", "ETH", "MATIC"];
 const PHI = 1.6180339887;
 
-/** * 思想の実体化：全ての港の根源となる PurePort クラス
- */
 class PurePort {
     constructor(assets = null) {
         this.assets = assets || Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0]));
     }
-
-    // 100の確実性を保証しつつ、裏側で数理 w=1/z の減衰を処理する
     flowTo(targetPort, unit, amount, z) {
         const w = 1 / (z || 0.001);
-        const friction = (1 / w) * 0.0001; // 宇宙の微小な代償
+        const friction = (1 / w) * 0.0001;
         const totalOut = amount + friction;
-
         if (this.assets[unit] >= totalOut && amount > 0) {
             this.assets[unit] -= totalOut;
-            targetPort.assets[unit] += amount; // 受け取る側には正確に 100 届く
+            targetPort.assets[unit] += amount;
             return { success: true, friction: friction };
         }
         return { success: false };
@@ -144,24 +137,16 @@ class PurePort {
 }
 
 let studio = {
-    z: 0.05,
-    w: 0,
-    ports: {
-        warehouse: new PurePort(),
-        export: new PurePort(),
-        import: new PurePort()
-    },
+    z: 0.05, w: 0,
+    ports: { warehouse: new PurePort(), export: new PurePort(), import: new PurePort() },
     tone: 'neutral', lang: 'jp', chronicles: []
 };
 
-/* --- データの永続化と同期 --- */
 function save() {
     const rawData = {
         tension: studio.z,
         assets: {
-            warehouse: studio.ports.warehouse.assets,
-            export: studio.ports.export.assets,
-            import: studio.ports.import.assets
+            warehouse: studio.ports.warehouse.assets, export: studio.ports.export.assets, import: studio.ports.import.assets
         },
         tone: studio.tone, lang: studio.lang, chronicles: studio.chronicles
     };
@@ -175,13 +160,10 @@ function load() {
         studio.ports.warehouse.assets = data.assets.warehouse;
         studio.ports.export.assets = data.assets.export;
         studio.ports.import.assets = data.assets.import;
-        studio.tone = data.tone;
-        studio.lang = data.lang;
-        studio.chronicles = data.chronicles;
+        studio.tone = data.tone; studio.lang = data.lang; studio.chronicles = data.chronicles;
     }
 }
 
-/* --- 計算と描画（妥当性の投影） --- */
 function updateState() {
     const totalPure = studio.ports.warehouse.assets.PURE + studio.ports.export.assets.PURE + studio.ports.import.assets.PURE;
     studio.z = (0.05 + (totalPure / 1000)) % (PHI * 2);
@@ -190,29 +172,26 @@ function updateState() {
 
 function render() {
     updateState();
+    const d = DICTIONARY[studio.lang];
     document.getElementById('z-val').textContent = studio.z.toFixed(8);
     document.getElementById('w-val').textContent = studio.w.toFixed(8);
 
-    const total = Object.fromEntries(COLOR_SYSTEM.map(c => [
-        c, studio.ports.warehouse.assets[c] + studio.ports.export.assets[c] + studio.ports.import.assets[c]
-    ]));
-
-    renderGrid('total-display', total);
+    renderGrid('total-display', Object.fromEntries(COLOR_SYSTEM.map(c => [c, studio.ports.warehouse.assets[c] + studio.ports.export.assets[c] + studio.ports.import.assets[c]])));
     renderGrid('warehouse-display', studio.ports.warehouse.assets);
     renderGrid('export-display', studio.ports.export.assets);
     renderGrid('import-display', studio.ports.import.assets);
     
     document.getElementById('chronicle-box').innerHTML = studio.chronicles.map(c => `<p><i>[${c.t}]</i> ${c.m}</p>`).reverse().join('');
     
-    // 入港信号の捕捉
+    // 待機中輸送体の表示（多言語化）
     const incoming = localStorage.getItem('TR_Bridge_to_PORT_A');
     const display = document.getElementById('import-manifest');
     if (incoming) {
         const p = JSON.parse(incoming);
-        display.innerHTML = `[捕捉] FROM: ${p.from} | ${p.unit}: ${p.amount}`;
+        display.innerHTML = `${d.manifest_capture} FROM: ${p.from}<br>${p.unit}: ${p.amount}`;
         display.style.color = "#00ff00";
     } else {
-        display.textContent = "待機中の輸送体なし";
+        display.textContent = d.manifest_none;
         display.style.color = "var(--accent)";
     }
 }
@@ -223,54 +202,56 @@ function renderGrid(id, data) {
     `).join('');
 }
 
-/* --- アクション（PORTの法に基づく実行） --- */
+/* アクション */
 function vanningAction() {
+    const d = DICTIONARY[studio.lang];
     const unit = document.getElementById('color-choice').value;
     const amount = Math.abs(parseFloat(document.getElementById('brush-intensity').value)) || 0;
     studio.ports.warehouse.assets[unit] += amount;
-    writeChronicle(`${amount} ${unit} を倉庫へ積み込み。`);
+    writeChronicle(`${amount} ${unit} ${d.log_vanning}`);
     save(); render();
 }
 
 function transportAction() {
+    const d = DICTIONARY[studio.lang];
     const unit = document.getElementById('color-choice').value;
     const amount = Math.abs(parseFloat(document.getElementById('brush-intensity').value)) || 0;
     const result = studio.ports.warehouse.flowTo(studio.ports.export, unit, amount, studio.z);
     if (result.success) {
-        writeChronicle(`${amount} ${unit} を輸出港へ輸送。摩擦代償: ${result.friction.toFixed(6)}`);
+        writeChronicle(`${amount} ${unit} ${d.log_transport} (${result.friction.toFixed(6)})`);
         save(); render();
     } else {
-        alert("数理的妥当性が不足しています（残高不足）");
+        alert(d.alert_balance);
     }
 }
 
 function sailingAction() {
+    const d = DICTIONARY[studio.lang];
     const unit = document.getElementById('color-choice').value;
     const amount = studio.ports.export.assets[unit];
     const dest = document.getElementById('destination-input').value.trim();
-    if (amount <= 0 || !dest) return alert("出港条件不備");
+    if (amount <= 0 || !dest) return alert(d.alert_sailing);
 
-    // 出港時にも数理減衰（エントロピー）を適用
-    const friction = (1 / studio.w) * 0.0001;
     studio.ports.export.assets[unit] = 0;
-    
     const manifest = { unit, amount, from: "PORT_A", id: "SIG-A" + Date.now().toString(16).toUpperCase(), z: studio.z };
     localStorage.setItem('TR_Bridge_to_' + dest, JSON.stringify(manifest));
-    writeChronicle(`${dest} へ ${amount} ${unit} を送出。`);
+    writeChronicle(`${d.log_sailing_prefix} ${dest} ${d.log_sailing_suffix} ${amount} ${unit}`);
     save(); render();
 }
 
 function arrivalAction() {
+    const d = DICTIONARY[studio.lang];
     const incoming = localStorage.getItem('TR_Bridge_to_PORT_A');
-    if (!incoming) return alert("信号なし");
+    if (!incoming) return alert(d.alert_no_signal);
     const p = JSON.parse(incoming);
     studio.ports.import.assets[p.unit] += p.amount;
     localStorage.removeItem('TR_Bridge_to_PORT_A');
-    writeChronicle(`${p.from} より ${p.amount} ${p.unit} を捕捉。`);
+    writeChronicle(`${p.from} ${d.log_arrival} ${p.amount} ${p.unit}`);
     save(); render();
 }
 
 function devanningAction() {
+    const d = DICTIONARY[studio.lang];
     let moved = false;
     COLOR_SYSTEM.forEach(c => {
         const amt = studio.ports.import.assets[c];
@@ -279,50 +260,85 @@ function devanningAction() {
             moved = true;
         }
     });
-    if (moved) { writeChronicle("輸入港から倉庫へデヴァンニング完了。"); save(); render(); }
+    if (moved) { writeChronicle(d.log_devanning); save(); render(); }
 }
 
-/* --- 基盤設定 --- */
+/* 設定と辞書 */
 const TONES = {
     neutral: { bg: "#0b0e11", surface: "#15191d", accent: "#6c757d", text: "#e9ecef", border: "#2d333b" },
     logical: { bg: "#050a0f", surface: "#0a141e", accent: "#007bff", text: "#a0d1ff", border: "#1a3a5a" },
     universal: { bg: "#1a1612", surface: "#2a241e", accent: "#d4a017", text: "#fff4e0", border: "#4a3f35" }
 };
+
 const DICTIONARY = {
-    en: { super_title: "TABULA RASA", brand_port_a: "PURE PORT A", tab_canvas: "PORT A", tab_book: "ARCHIVE", tab_status: "STATUS", title_total: "TOTAL", title_warehouse: "WAREHOUSE", title_export: "EXPORT", title_import: "IMPORT", btn_vanning: "VANNING", btn_move_export: "TRANSPORT", btn_sailing: "SAILING", btn_arrival: "ARRIVAL", btn_devanning: "DEVANNING", label_z: "z-Status", label_w: "w-Status", title_book: "ARCHIVE", title_status: "STATUS", title_reset: "CLEAN", btn_reset: "Clean" },
-    jp: { super_title: "タブラ・ラサ", brand_port_a: "ピュア・ポートA", tab_canvas: "港 A", tab_book: "公文書", tab_status: "状態", title_total: "港 A 全体", title_warehouse: "倉庫", title_export: "輸出港", title_import: "輸入港", btn_vanning: "積み込み", btn_move_export: "輸送", btn_sailing: "出港", btn_arrival: "捕捉承認", btn_devanning: "積み下ろし", label_z: "zの状態", label_w: "wの状態", title_book: "公文書記録", title_status: "港の状態", title_reset: "港の掃除", btn_reset: "港を掃除する" }
+    en: { 
+        super_title: "TABULA RASA", brand_port_a: "PURE PORT A", tab_canvas: "PORT A", tab_book: "ARCHIVE", tab_status: "STATUS", 
+        title_total: "TOTAL", title_warehouse: "WAREHOUSE", title_export: "EXPORT", title_import: "IMPORT", 
+        btn_vanning: "VANNING", btn_move_export: "TRANSPORT", btn_sailing: "SAILING", btn_arrival: "ARRIVAL", btn_devanning: "DEVANNING", 
+        label_z: "z-Status", label_w: "w-Status", label_dest: "Destination:",
+        title_book: "ARCHIVE", title_status: "STATUS", title_reset: "CLEAN", btn_reset: "Clean",
+        manifest_none: "No vessels in transit", manifest_capture: "[CAPTURED]",
+        log_vanning: "vanning to warehouse.", log_transport: "transported to export port.",
+        log_sailing_prefix: "Sailed to", log_sailing_suffix: ":", log_arrival: "arrived:", log_devanning: "Devanning complete.",
+        alert_balance: "Insufficient logical validity (Balance)", alert_sailing: "Sailing conditions incomplete", alert_no_signal: "No signal"
+    },
+    jp: { 
+        super_title: "タブラ・ラサ", brand_port_a: "ピュア・ポートA", tab_canvas: "港 A", tab_book: "公文書", tab_status: "状態", 
+        title_total: "港 A 全体", title_warehouse: "倉庫", title_export: "輸出港", title_import: "輸入港", 
+        btn_vanning: "積み込み", btn_move_export: "輸送", btn_sailing: "出港", btn_arrival: "捕捉承認", btn_devanning: "積み下ろし", 
+        label_z: "zの状態", label_w: "wの状態", label_dest: "出港先:",
+        title_book: "公文書記録", title_status: "港の状態", title_reset: "港の掃除", btn_reset: "港を掃除する",
+        manifest_none: "待機中の輸送体なし", manifest_capture: "[捕捉]",
+        log_vanning: "を倉庫へ積み込み。", log_transport: "を輸出港へ輸送。",
+        log_sailing_prefix: "", log_sailing_suffix: "へ向けて出港:", log_arrival: "より到着:", log_devanning: "デヴァンニング完了。",
+        alert_balance: "数理的妥当性が不足しています（残高不足）", alert_sailing: "出港条件不備", alert_no_signal: "信号なし"
+    }
 };
 
 function updateLabels() {
     studio.lang = document.getElementById('ui-lang').value;
     const d = DICTIONARY[studio.lang];
     document.querySelectorAll('[data-key]').forEach(el => { el.textContent = d[el.getAttribute('data-key')]; });
+    
+    // 出港先入力欄の初期値を同期
+    const destInput = document.getElementById('destination-input');
+    if (destInput.value === "PORT_B" || destInput.value === "ポート B") {
+        destInput.value = (studio.lang === 'en') ? "PORT_B" : "PORT_B"; // 必要なら名称を調整
+    }
+
     const sel = document.getElementById('color-choice');
+    const currentVal = sel.value;
     sel.innerHTML = ''; COLOR_SYSTEM.forEach(c => sel.add(new Option(c, c)));
+    if (currentVal) sel.value = currentVal;
     render();
 }
+
 function applyTheme() {
     studio.tone = document.getElementById('ui-tone').value;
     const theme = TONES[studio.tone];
     Object.keys(theme).forEach(key => document.documentElement.style.setProperty(`--${key}`, theme[key]));
     save();
 }
+
 function writeChronicle(m) {
     studio.chronicles.push({ t: new Date().toLocaleTimeString(), m });
     if (studio.chronicles.length > 50) studio.chronicles.shift();
 }
+
 function showPane(id) {
     document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.getElementById('pane-' + id).classList.add('active');
     document.getElementById('btn-' + id).classList.add('active');
 }
+
 function executeClean() {
     if (confirm("港を掃除しますか？")) {
         localStorage.removeItem('tabula_rasa_port_a_v15_pure');
         location.reload();
     }
 }
+
 document.addEventListener('DOMContentLoaded', () => { load(); updateLabels(); applyTheme(); setInterval(render, 1000); });
 </script>
 </body>
