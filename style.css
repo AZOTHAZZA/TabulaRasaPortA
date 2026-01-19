@@ -1,33 +1,34 @@
-/* style.css (最終調整版: 色彩の統一感とモバイル対応を確保) */
+/* PURE style.css: 数理的沈黙と黄金比によるUI定義 */
 
 :root {
     --color-background: #1e1e1e;
     --color-sidebar: #252526;
     --color-text: #cccccc;
-    --color-log-ai: #d4eaf7; 
-    --color-log-user: #f7d4e4; 
-    --color-log-core: #b7e3b7; 
+    
+    /* 概念の転生: AI/User から LOGOS/RATIO へ */
+    --color-log-logos: #d4eaf7; /* 論理の出力 (旧AI) */
+    --color-log-ratio: #f7d4e4; /* 理性の入力 (旧User) */
+    --color-log-pure: #b7e3b7;  /* 根源的状態 (旧Core) */
+    
     --color-alert-red: #ff4136;
     --color-gauge-bg: #333;
     --color-gauge-low: #3d9970; 
     --color-gauge-high: #ff851b; 
     --color-gauge-critical: #ff4136; 
 
-    /* アクションボタンカラーパレット */
+    /* PURE 船団アクションボタン */
     --color-button-default: #555;
     --color-button-internal: #0074d9; /* 内部送金 (青) */
     --color-button-external: #ff4136; /* 外部送金 (赤) */
     --color-button-revision: #7fdbff; /* 修正請願 (水色) */
 
-    /* 🌟 法定通貨生成ボタンの色を個別に設定 */
-    --color-mint-jpy: #C93437; /* JPY: 赤/ワインレッド系 */
-    --color-mint-usd: #004D40; /* USD: ダークグリーン系 */
-    --color-mint-eur: #003399; /* EUR: 濃い青系 */
-
-    /* 暗号通貨の色 (既存の値をCSS変数化) */
-    --color-mint-btc: #f7931a;
-    --color-mint-eth: #627EEA;
-    --color-mint-matic: #8247E5;
+    /* 通貨錬成パレット (祝祭の色彩) */
+    --color-mint-jpy: #C93437; /* JPY: 赤/ワインレッド */
+    --color-mint-usd: #004D40; /* USD: ダークグリーン */
+    --color-mint-eur: #003399; /* EUR: 濃い青 */
+    --color-mint-btc: #f7931a; /* BTC: オレンジ */
+    --color-mint-eth: #627EEA; /* ETH: パープルブルー */
+    --color-mint-matic: #8247E5; /* MATIC: バイオレット */
 }
 
 body {
@@ -39,6 +40,7 @@ body {
     height: 100vh;
     overflow: hidden; 
     font-size: 14px;
+    overscroll-behavior: none; /* PWAとしての操作感を向上 */
 }
 
 #sidebar {
@@ -48,6 +50,7 @@ body {
     box-sizing: border-box;
     overflow-y: auto; 
     flex-shrink: 0;
+    border-right: 1px solid #333;
 }
 
 #main-content {
@@ -58,7 +61,7 @@ body {
     overflow: hidden;
 }
 
-/* --- ゲージと入力エリア --- */
+/* --- ゲージエリア --- */
 .gauge-area {
     margin-bottom: 20px;
     padding: 15px;
@@ -82,7 +85,7 @@ body {
     transition: width 0.3s ease-in-out, background-color 0.3s ease-in-out;
 }
 
-/* --- アクションボタンと入力 --- */
+/* --- アクションボタン --- */
 .action-input {
     width: calc(100% - 10px);
     padding: 8px;
@@ -91,6 +94,7 @@ body {
     border: 1px solid #555;
     color: var(--color-text);
     border-radius: 3px;
+    outline: none;
 }
 
 .action-button {
@@ -101,39 +105,32 @@ body {
     border-radius: 3px;
     color: white;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: opacity 0.2s;
     font-weight: bold;
+    user-select: none;
 }
 
-.action-button:hover {
-    opacity: 0.8;
-}
+.action-button:hover { opacity: 0.8; }
+.action-button:active { transform: translateY(1px); }
 
-/* 既存の作為ボタンカラー */
+/* 基本ボタンカラー */
 #transfer_internal_button { background-color: var(--color-button-internal); }
 #transfer_external_button { background-color: var(--color-button-external); }
 #revision_button { background-color: var(--color-button-revision); }
 
-
-/* 🌟 通貨生成ボタンのクラス定義 */
-.action-mint { 
-    margin-bottom: 5px;
-}
-
+/* 通貨生成ボタン */
 .mint-jpy { background-color: var(--color-mint-jpy); }
 .mint-usd { background-color: var(--color-mint-usd); }
 .mint-eur { background-color: var(--color-mint-eur); }
-
 .mint-btc { background-color: var(--color-mint-btc); }
 .mint-eth { background-color: var(--color-mint-eth); }
 .mint-matic { background-color: var(--color-mint-matic); }
-
 
 /* --- メインログエリア --- */
 #dialogue-output {
     flex-grow: 1;
     overflow-y: auto;
-    padding-right: 10px;
+    padding: 15px;
     background-color: #111;
     border: 1px solid #333;
     border-radius: 5px;
@@ -141,26 +138,27 @@ body {
 }
 
 .message {
-    padding: 8px 10px;
-    margin-bottom: 5px;
-    border-radius: 3px;
-    line-height: 1.5;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    line-height: 1.6;
 }
 
-.ai-message {
+.logos-message { /* 旧 AI */
     background-color: #333;
-    color: var(--color-log-core);
+    color: var(--color-log-logos);
 }
 
-.user-message {
+.ratio-message { /* 旧 User */
     background-color: #444;
-    color: var(--color-log-user);
+    color: var(--color-log-ratio);
     text-align: right;
 }
 
-.core-status-message {
+.pure-status-message { /* 旧 Core */
     background-color: #2a3a2a;
-    color: var(--color-log-core);
+    color: var(--color-log-pure);
+    font-style: italic;
 }
 
 /* --- 入力エリア --- */
@@ -172,51 +170,30 @@ body {
 
 #dialogue_input {
     flex-grow: 1;
-    padding: 10px;
+    padding: 12px;
     background-color: #444;
     border: 1px solid #555;
     color: var(--color-text);
     border-radius: 3px;
     margin-right: 10px;
+    outline: none;
 }
 
 #dialogue_button {
-    padding: 10px 15px;
-    background-color: #0074d9;
+    padding: 0 20px;
+    background-color: var(--color-button-internal);
     color: white;
     border: none;
     border-radius: 3px;
     cursor: pointer;
+    font-weight: bold;
 }
 
-
-/* --- 🌟 モバイルフレンドリーな修正 (レスポンシブデザイン) --- */
+/* --- レスポンシブ修正 --- */
 @media (max-width: 900px) {
-    body {
-        flex-direction: column;
-        overflow-y: auto; 
-        height: auto;
-    }
-
-    #sidebar {
-        width: 100%;
-        max-height: 80vh; 
-        padding: 10px;
-    }
-
-    #main-content {
-        padding: 10px;
-        min-height: 300px; 
-    }
-    
-    #dialogue-output {
-        height: 100%; 
-        min-height: 150px; 
-        margin-bottom: 10px;
-    }
-
-    /* ボタンと入力のレイアウト調整 */
-    .action-button, .action-input {
-        font-size: 14px;
-    }
+    body { flex-direction: column; overflow-y: auto; height: auto; }
+    #sidebar { width: 100%; max-height: 70vh; padding: 15px; border-right: none; border-bottom: 1px solid #333; }
+    #main-content { padding: 15px; min-height: 400px; }
+    #dialogue-output { min-height: 250px; }
+    .action-button { padding: 15px; font-size: 15px; } /* モバイルでのタップしやすさを向上 */
 }
