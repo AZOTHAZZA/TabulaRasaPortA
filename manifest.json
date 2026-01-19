@@ -1,42 +1,35 @@
 {
-  "name": "MSGAI - Mathematical Silence Generator",
-  "short_name": "MSGAI",
-  "description": "A self-contained PWA that embodies mathematical silence — a fusion of logic, stillness, and autonomy.",
+  "name": "PURE - The Origin of Arche and Logos",
+  "short_name": "PURE",
+  "description": "数学的沈黙、論理、そして自律。それらが融合し、世界の深層（アルケー）を記述する唯一の港。",
   
-  // 🚨 修正: 絶対パスから相対パスに強制変更
   "start_url": "./index.html", 
-  "scope": "./", // 🚨 修正: スコープを現在のディレクトリに設定
+  "scope": "./",
 
   "display": "standalone",
   "background_color": "#000000",
-  "theme_color": "#101010",
+  "theme_color": "#FFD700", // ゴールド（祝祭）を意識した色使いへの変更案
   "orientation": "portrait",
   "lang": "ja", 
   
-  // 日本語での論理的起動を優先（開発環境に合わせる）
-  
   "icons": [
     {
-      // 🚨 修正: 絶対パスから相対パスに強制変更
       "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      // 🚨 修正: 絶対パスから相対パスに強制変更
       "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
   ],
-  "categories": ["productivity", "education", "philosophy", "science"],
-  "prefer_related_applications": false,
+  "categories": ["finance", "philosophy", "sovereignty", "science"],
   "shortcuts": [
     {
-      "name": "沈黙モードへ移行 (Enter Silence Mode)",
-      // 🚨 修正: 絶対パスから相対パスに強制変更
-      "url": "index.html?mode=silence",
-      "description": "システムを完全な内的沈黙モードに排他的に移行させます。"
+      "name": "PURE/LOGOS 起動",
+      "url": "index.html?mode=logos",
+      "description": "純粋論理による錬成プロセスを開始します。"
     }
   ]
 }
